@@ -489,6 +489,74 @@ footer a {
   opacity: 1;
 }
 
+.nav-right-static {
+  position: static;
+  display: flex;
+}
+
+.conduct-page {
+  max-width: 920px;
+  margin: 0 auto;
+  display: grid;
+  gap: 1.2rem;
+}
+
+.conduct-card {
+  background: rgba(15, 26, 32, 0.88);
+  border: 1px solid var(--border-soft);
+  border-radius: 14px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-soft);
+}
+
+.conduct-title {
+  font-size: clamp(2rem, 2.2vw + 1.1rem, 3rem);
+  line-height: 1.1;
+  margin-bottom: 0.7rem;
+}
+
+.conduct-intro {
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.conduct-card h2 {
+  font-size: 1.25rem;
+  margin-bottom: 0.65rem;
+}
+
+.conduct-card p {
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.conduct-card p + p {
+  margin-top: 0.7rem;
+}
+
+.conduct-card ul {
+  margin: 0.6rem 0 0 1.2rem;
+}
+
+.conduct-card li {
+  margin-bottom: 0.5rem;
+  color: var(--text-main);
+  line-height: 1.55;
+}
+
+.conduct-card li:last-child {
+  margin-bottom: 0;
+}
+
+.conduct-links a {
+  color: var(--accent-soft);
+  text-decoration: underline;
+}
+
+.conduct-links a:hover {
+  color: var(--accent);
+}
+
 @media (max-width: 960px) {
   .hero {
     grid-template-columns: 1fr;
@@ -506,6 +574,14 @@ footer a {
 
   .hero-copy {
     margin: 0 auto;
+  }
+
+  .nav-right-static {
+    position: static;
+    display: flex;
+    background: transparent;
+    border: none;
+    padding: 0;
   }
 }
 
@@ -609,5 +685,9 @@ footer a {
 
   .editions-table td:first-child {
     color: var(--text-main);
+  }
+
+  .conduct-card {
+    padding: 1.1rem;
   }
 }
