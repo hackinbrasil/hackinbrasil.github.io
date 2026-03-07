@@ -4,3 +4,5 @@ lang: pt-BR
 timezone: America/Sao_Paulo
 markdown: kramdown
 plugins: []
+exclude:
+  - README.md
