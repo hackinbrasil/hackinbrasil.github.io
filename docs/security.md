@@ -50,6 +50,12 @@ Adotar uma abordagem em camadas para reduzir riscos de vulnerabilidades em códi
 - Implementação atual: AES-GCM com chave em secret (`DOC_ENCRYPTION_KEY_BASE64`) no Cloudflare Workers.
 - Foco: reduzir impacto em caso de acesso indevido ao banco.
 
+### 8. Headers HTTP de segurança na borda
+
+- O site estático em GitHub Pages recebe headers de segurança via Worker de borda da Cloudflare (`workers/site-security-headers`).
+- Foco: reduzir exposição de superfície no navegador e atender verificações DAST de headers ausentes.
+- Deploy e operação: `workers/site-security-headers/README.md` e workflow `.github/workflows/deploy-site-security-headers.yml`.
+
 ## Medidas Complementares Recomendadas
 
 - Rate limiting e CAPTCHA (ex.: Turnstile) no endpoint de inscrição.
