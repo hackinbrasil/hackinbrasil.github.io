@@ -1,0 +1,155 @@
+---
+layout: default
+title: Meetup Hack in Brasil | 25/03/2026
+permalink: /meetup-25-03-2026/
+---
+<header class="nav">
+  <div class="nav-left">
+    <a class="nav-brand" href="{{ '/' | relative_url }}">
+      <img class="nav-logo" src="{{ '/assets/images/hackinbrasil.png' | relative_url }}" alt="Logo Hack in Brasil">
+      <span>Hack in Brasil</span>
+    </a>
+    <span class="nav-logo-tag">Meetup</span>
+  </div>
+  <nav class="nav-right nav-right-static">
+    <a class="nav-link" href="{{ '/' | relative_url }}">Voltar para início</a>
+  </nav>
+</header>
+
+<main class="meetup-page">
+  <section class="meetup-card">
+    <p class="hero-kicker">Próximo encontro</p>
+    <h1 class="meetup-title">Meetup de Cibersegurança - 25/03/2026</h1>
+    <p class="meetup-subtitle">
+      Uma noite para compartilhar conhecimento prático em AppSec, DevSecOps e segurança ofensiva.
+    </p>
+    <p class="speaker-role">Horário: 19h às 22h</p>
+  </section>
+
+  <section class="meetup-card">
+    <h2>Agenda e Palestrantes</h2>
+    <p class="meetup-subtitle">Início às 19h e encerramento às 22h.</p>
+    <div class="talks-grid">
+      <article class="talk-card">
+        <p class="talk-time">19:00</p>
+        <h3>Cerimônia de abertura</h3>
+        <p>Boas-vindas, recados da organização e visão geral da agenda da noite.</p>
+      </article>
+
+      <article class="talk-card">
+        <p class="talk-time">19:15</p>
+        <div class="talk-layout">
+          <div class="talk-content">
+            <h3>10 Verificações Rápidas para Saber se Sua Conta AWS Está Realmente Segura</h3>
+            <p>
+              Quando entro em uma conta AWS pela primeira vez, sigo um checklist claro: sem ferramenta milagrosa e sem
+              teoria demais, apenas verificações práticas que revelam rapidamente o nível real de maturidade de segurança.
+              Nesta palestra, Amaury compartilha as 10 análises que faz nos primeiros minutos, com uma abordagem simples,
+              direta e baseada em experiências reais.
+            </p>
+          </div>
+          <aside class="talk-speaker">
+            <img src="{{ '/assets/images/speakers/amaury.jpg' | relative_url }}" alt="Foto de Amaury Borges Souza">
+            <h4>Amaury Borges Souza</h4>
+            <p class="speaker-role">Senior Cloud Security Engineer • Professor de MBA na FIAP</p>
+            <p>
+              Especialista em DevSecOps, Terraform e segurança em nuvem, com 12+ anos de experiência em ambientes
+              financeiros, corporativos e multi-cloud.
+            </p>
+          </aside>
+        </div>
+      </article>
+
+      <article class="talk-card">
+        <p class="talk-time">19:50</p>
+        <div class="talk-layout">
+          <div class="talk-content">
+            <h3></h3>
+            <p></p>
+          </div>
+          <aside class="talk-speaker">
+            <img src="{{ '/assets/images/speakers/mariana.jpeg' | relative_url }}" alt="Foto de Mariana Gonçalves">
+            <h4>Mariana Gonçalves</h4>
+            <p class="speaker-role">Mestranda na UFRJ</p>
+            <p></p>
+          </aside>
+        </div>
+      </article>
+
+      <article class="talk-card">
+        <p class="talk-time">20:25</p>
+        <h3>Coffee break</h3>
+        <p>Pausa para networking, troca de ideias e conexão entre participantes.</p>
+      </article>
+
+      <article class="talk-card">
+        <p class="talk-time">20:45</p>
+        <div class="talk-layout">
+          <div class="talk-content">
+            <h3></h3>
+            <p></p>
+          </div>
+          <aside class="talk-speaker">
+            <img src="{{ '/assets/images/hackinbrasil.png' | relative_url }}" alt="Foto de Palestrante 3">
+            <h4></h4>
+            <p class="speaker-role"></p>
+            <p></p>
+          </aside>
+        </div>
+      </article>
+
+      <article class="talk-card">
+        <p class="talk-time">21:30</p>
+        <h3>Encerramento + sorteios</h3>
+        <p>Fechamento do meetup com agradecimentos e sorteios para a comunidade.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="meetup-card">
+    <h2>Inscrição</h2>
+    <p class="meetup-subtitle" id="registration-status">
+      Carregando disponibilidade...
+    </p>
+    <form id="meetup-registration-form" class="registration-form" data-api-base="https://hackinbrasil-meetup-api.hi-c21.workers.dev" data-meetup-slug="meetup-25-03-2026">
+      <input type="text" name="name" placeholder="Nome completo" required>
+      <input type="email" name="email" placeholder="E-mail" required>
+      <input type="text" name="document" placeholder="Documento (CPF/RG)" required>
+      <label class="registration-consent">
+        <input type="checkbox" name="consentLgpd" required>
+        Autorizo o uso dos meus dados para gestão da inscrição deste meetup.
+      </label>
+      <button class="btn btn-primary" type="submit" id="registration-submit">
+        Inscrever-se
+      </button>
+      <p class="registration-feedback" id="registration-feedback" aria-live="polite"></p>
+    </form>
+  </section>
+
+  <section class="meetup-card">
+    <h2>Patrocínio</h2>
+    <a class="sponsor-card sponsor-link" href="https://www.fiap.com.br/" target="_blank" rel="noopener noreferrer" aria-label="Abrir site da FIAP">
+      <img src="{{ '/assets/images/sponsors/fiap.png' | relative_url }}" alt="Logo FIAP">
+    </a>
+  </section>
+
+  <section class="meetup-card">
+    <h2>Local do Meetup</h2>
+    <p><strong>Endereço completo:</strong> Rua Marques de Olinda, 11</p>
+    <p>
+      <a class="meetup-map-link" href="https://maps.google.com/?q=FIAP+Rio+de+Janeiro" target="_blank" rel="noopener noreferrer">
+        Abrir no Google Maps
+      </a>
+    </p>
+    <div class="meetup-map">
+      <iframe
+        title="Mapa do local do meetup"
+        src="https://maps.google.com/maps?q=FIAP%20Rio%20de%20Janeiro&t=&z=15&ie=UTF8&iwloc=&output=embed"
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade">
+      </iframe>
+    </div>
+  </section>
+</main>
+
+<script src="{{ '/assets/js/meetup-registration.js' | relative_url }}"></script>
