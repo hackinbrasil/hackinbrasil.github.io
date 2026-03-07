@@ -89,6 +89,7 @@ This ensures frontend cannot bypass the limit.
 - Consent flag is mandatory
 - CORS restricted via `ALLOWED_ORIGIN`
 - Recommendation: add Turnstile CAPTCHA and retention policy (delete records after event window)
+- DPO contact for privacy requests: `dpo@hackinbrasil.com.br`
 
 ## Cloudflare setup checklist
 

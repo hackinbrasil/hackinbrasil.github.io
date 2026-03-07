@@ -13,6 +13,7 @@ Site institucional da comunidade **Hack in Brasil**, publicado com **GitHub Page
 
 - `index.html`: página principal
 - `codigo-de-conduta.html`: código de conduta (`/codigo-de-conduta/`)
+- `politica-de-privacidade.html`: política de privacidade (`/politica-de-privacidade/`)
 - `_layouts/default.html`: layout base Jekyll
 - `_config.yml`: configuração do Jekyll
 - `assets/css/style.css`: estilos
@@ -27,7 +28,7 @@ Site institucional da comunidade **Hack in Brasil**, publicado com **GitHub Page
 
 ### Pré-requisitos
 
-- Ruby 2.6.10
+- Ruby 3.2.2
 - Bundler (`gem install bundler`)
 
 ### Comandos
@@ -73,3 +74,8 @@ O site continua estático em Jekyll. As inscrições são processadas por API se
 Configuração detalhada em `workers/meetup-api/README.md`.
 
 Documentação operacional completa em `docs/meetup-subscriptions.md`.
+
+## Privacidade
+
+- Política de privacidade: `politica-de-privacidade.html`
+- Contato DPO: `dpo@hackinbrasil.com.br`
