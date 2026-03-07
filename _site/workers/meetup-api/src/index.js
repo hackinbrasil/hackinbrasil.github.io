@@ -30,6 +30,24 @@ function normalizeDocument(document) {
   return String(document || "").replace(/\D+/g, "");
 }
 
+function isValidCpf(document) {
+  const cpf = normalizeDocument(document);
+  if (cpf.length !== 11) return false;
+  if (/^(\d)\1+$/.test(cpf)) return false;
+
+  let sum = 0;
+  for (let i = 0; i < 9; i += 1) sum += Number(cpf[i]) * (10 - i);
+  let firstDigit = (sum * 10) % 11;
+  if (firstDigit === 10) firstDigit = 0;
+  if (firstDigit !== Number(cpf[9])) return false;
+
+  sum = 0;
+  for (let i = 0; i < 10; i += 1) sum += Number(cpf[i]) * (11 - i);
+  let secondDigit = (sum * 10) % 11;
+  if (secondDigit === 10) secondDigit = 0;
+  return secondDigit === Number(cpf[10]);
+}
+
 async function getMeetupBySlug(db, slug) {
   return db
     .prepare("SELECT slug, title, event_date, capacity, registrations_count, is_open FROM meetups WHERE slug = ?")
@@ -119,8 +137,8 @@ async function handleRegister(request, env, slug, corsOrigin) {
   if (!isValidEmail(email)) {
     return json({ error: "E-mail inválido" }, 400, corsOrigin);
   }
-  if (document.length < 11 || document.length > 14) {
-    return json({ error: "Documento inválido" }, 400, corsOrigin);
+  if (!isValidCpf(document)) {
+    return json({ error: "CPF inválido" }, 400, corsOrigin);
   }
   if (!consentLgpd) {
     return json({ error: "Consentimento LGPD é obrigatório" }, 400, corsOrigin);

@@ -71,3 +71,5 @@ O site continua estático em Jekyll. As inscrições são processadas por API se
 - Página de meetup com formulário: `meetup-25-03-2026.html`
 
 Configuração detalhada em `workers/meetup-api/README.md`.
+
+Documentação operacional completa em `docs/meetup-subscriptions.md`.

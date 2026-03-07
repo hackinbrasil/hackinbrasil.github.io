@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Meetup API Worker (Cloudflare)</title>
+  <title>Política de Privacidade | Hack in Brasil</title>
   <link rel="icon" type="image/png" href="/assets/images/hackinbrasil.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,85 +11,112 @@
   <link rel="stylesheet" type="text/css" href="/assets/css/style.css">
 </head>
 <body>
-  <h1 id="meetup-api-worker-cloudflare">Meetup API Worker (Cloudflare)</h1>
+  <header class="nav">
+  <div class="nav-left">
+    <a class="nav-brand" href="/">
+      <img class="nav-logo" src="/assets/images/hackinbrasil.png" alt="Logo Hack in Brasil">
+      <span>Hack in Brasil</span>
+    </a>
+    <span class="nav-logo-tag">Privacidade</span>
+  </div>
+  <nav class="nav-right nav-right-static">
+    <a class="nav-link" href="/">Voltar para início</a>
+  </nav>
+</header>
 
-<p>API serverless para inscrições de meetup, com limite de vagas rígido (sem lista de espera).</p>
+<main class="conduct-page">
+  <section class="conduct-card">
+    <p class="hero-kicker">LGPD</p>
+    <h1 class="conduct-title">Política de Privacidade</h1>
+    <p class="conduct-intro">
+      Esta política explica como o Hack in Brasil coleta, usa e protege dados pessoais em seus canais,
+      especialmente no formulário de inscrição para meetups.
+    </p>
+  </section>
 
-<h2 id="endpoints">Endpoints</h2>
+  <section class="conduct-card">
+    <h2>1. Dados coletados</h2>
+    <p>Para inscrições em meetups, coletamos:</p>
+    <ul>
+      <li>Nome completo;</li>
+      <li>E-mail;</li>
+      <li>CPF;</li>
+      <li>Consentimento de uso de dados para gestão da inscrição.</li>
+    </ul>
+  </section>
 
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">GET /api/meetups/:slug/status</code></li>
-  <li><code class="language-plaintext highlighter-rouge">POST /api/meetups/:slug/register</code></li>
-</ul>
+  <section class="conduct-card">
+    <h2>2. Finalidade do uso</h2>
+    <p>Usamos os dados para:</p>
+    <ul>
+      <li>Gerenciar inscrições e limite de participantes dos eventos;</li>
+      <li>Evitar inscrições duplicadas e fraude;</li>
+      <li>Realizar comunicações relacionadas ao meetup inscrito.</li>
+    </ul>
+  </section>
 
-<h2 id="dados-coletados">Dados coletados</h2>
+  <section class="conduct-card">
+    <h2>3. Base legal e consentimento</h2>
+    <p>
+      O tratamento é realizado com base no consentimento da pessoa titular e no legítimo interesse
+      organizacional para operação dos eventos da comunidade, em conformidade com a Lei Geral de
+      Proteção de Dados Pessoais (Lei n. 13.709/2018).
+    </p>
+  </section>
 
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">name</code></li>
-  <li><code class="language-plaintext highlighter-rouge">email</code></li>
-  <li><code class="language-plaintext highlighter-rouge">document</code> (armazenado criptografado)</li>
-  <li><code class="language-plaintext highlighter-rouge">consentLgpd</code></li>
-</ul>
+  <section class="conduct-card">
+    <h2>4. Armazenamento e proteção</h2>
+    <p>
+      Os dados são armazenados em infraestrutura em nuvem e protegidos por controles de acesso.
+      O CPF é armazenado de forma criptografada.
+    </p>
+  </section>
 
-<h2 id="regras-de-lotação">Regras de lotação</h2>
+  <section class="conduct-card">
+    <h2>5. Compartilhamento de dados</h2>
+    <p>
+      Não comercializamos dados pessoais. Podemos compartilhar informações com prestadores de serviço
+      estritamente necessários para operação técnica da inscrição e infraestrutura.
+    </p>
+  </section>
 
-<ul>
-  <li>Sem waitlist.</li>
-  <li>Ao atingir <code class="language-plaintext highlighter-rouge">capacity</code>, novas inscrições retornam erro e o frontend desabilita o botão.</li>
-</ul>
+  <section class="conduct-card">
+    <h2>6. Retenção e exclusão</h2>
+    <p>
+      Os dados são mantidos apenas pelo período necessário à finalidade do evento e às obrigações legais.
+      Após esse período, os dados podem ser anonimizados ou excluídos de forma segura.
+    </p>
+  </section>
 
-<h2 id="setup">Setup</h2>
+  <section class="conduct-card">
+    <h2>7. Direitos da pessoa titular</h2>
+    <p>Você pode solicitar:</p>
+    <ul>
+      <li>Confirmação da existência de tratamento;</li>
+      <li>Acesso, correção e atualização dos dados;</li>
+      <li>Anonimização, bloqueio ou exclusão, quando aplicável;</li>
+      <li>Revogação do consentimento.</li>
+    </ul>
+  </section>
 
-<ol>
-  <li>Criar D1 e atualizar <code class="language-plaintext highlighter-rouge">database_id</code> em <code class="language-plaintext highlighter-rouge">wrangler.toml</code>.</li>
-  <li>Instalar dependências:</li>
-</ol>
+  <section class="conduct-card conduct-links">
+    <h2>8. Contato</h2>
+    <p>
+      Para assuntos de privacidade e proteção de dados, entre em contato pelos canais oficiais da
+      comunidade disponíveis no site ou pelo e-mail:
+      <a href="mailto:dpo@hackinbrasil.com.br">dpo@hackinbrasil.com.br</a>.
+    </p>
+  </section>
 
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cd </span>workers/meetup-api
-npm <span class="nb">install</span>
-</code></pre></div></div>
-
-<ol>
-  <li>Aplicar migração:</li>
-</ol>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npx wrangler d1 migrations apply meetup_db
-</code></pre></div></div>
-
-<ol>
-  <li>Definir secret:</li>
-</ol>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npx wrangler secret put DOC_ENCRYPTION_KEY_BASE64
-</code></pre></div></div>
-
-<p><code class="language-plaintext highlighter-rouge">DOC_ENCRYPTION_KEY_BASE64</code> deve ser uma chave AES-256 em Base64 (32 bytes).</p>
-
-<ol>
-  <li>Deploy:</li>
-</ol>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npx wrangler deploy
-</code></pre></div></div>
-
-<h2 id="integração-com-jekyll">Integração com Jekyll</h2>
-
-<p>No formulário da página do meetup, ajustar:</p>
-
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">data-api-base="https://SEU-WORKER-DOMAIN"</code></li>
-  <li><code class="language-plaintext highlighter-rouge">data-meetup-slug="meetup-25-03-2026"</code></li>
-</ul>
-
-<p>Arquivo integrado: <code class="language-plaintext highlighter-rouge">assets/js/meetup-registration.js</code>.</p>
-
-<h2 id="segurança--lgpd">Segurança / LGPD</h2>
-
-<ul>
-  <li>Documento criptografado no banco.</li>
-  <li>Consentimento obrigatório (<code class="language-plaintext highlighter-rouge">consentLgpd=true</code>).</li>
-  <li>Recomenda-se adicionar captcha e política de retenção dos dados.</li>
-</ul>
+  <section class="conduct-card">
+    <h2>9. Atualizações desta política</h2>
+    <p>
+      Esta política pode ser atualizada periodicamente para refletir mudanças legais, técnicas ou
+      operacionais. A versão vigente estará sempre publicada nesta página.
+    </p>
+    <p><strong>Última atualização:</strong> 7 de março de 2026.</p>
+  </section>
+</main>
 
   <footer>
   <div class="footer-left">

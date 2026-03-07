@@ -645,10 +645,11 @@ footer a {
 }
 
 .talk-card {
+  position: relative;
   background: rgba(11, 20, 26, 0.75);
   border: 1px solid var(--border-soft);
   border-radius: 12px;
-  padding: 0.95rem;
+  padding: 3rem 0.95rem 0.95rem;
 }
 
 .talk-layout {
@@ -698,13 +699,17 @@ footer a {
 
 .talk-time {
   display: inline-flex;
+  position: absolute;
+  top: 0.95rem;
+  left: 0.95rem;
   font-family: 'DM Mono', monospace;
   font-size: 0.75rem;
-  color: #111;
+  color: #000000;
+  font-weight: 700;
   background: var(--accent);
   border-radius: var(--radius-pill);
   padding: 0.25rem 0.6rem;
-  margin-bottom: 0.55rem;
+  margin-bottom: 0;
 }
 
 .meetup-map-link {
@@ -786,33 +791,41 @@ footer a {
   color: #ff8f8f;
 }
 
-.registration-form input[type=\"text\"],
-.registration-form input[type=\"email\"] {
+.registration-input {
+  -webkit-appearance: none;
+  appearance: none;
   width: 100%;
   border-radius: 9px;
   border: 1px solid var(--border-soft);
   padding: 0.8rem 0.9rem;
-  background: rgba(5, 10, 14, 0.7);
+  background: linear-gradient(180deg, rgba(6, 12, 17, 0.95), rgba(4, 9, 13, 0.95));
   color: var(--text-main);
   font-family: inherit;
   font-size: 0.95rem;
+  transition: border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
 }
 
-.registration-form input[type=\"text\"]::placeholder,
-.registration-form input[type=\"email\"]::placeholder {
+.registration-input::placeholder {
   color: #6e7a82;
 }
 
-.registration-form input[type=\"text\"]:focus,
-.registration-form input[type=\"email\"]:focus {
+.registration-input:focus {
   border-color: var(--accent-soft);
   outline: none;
   box-shadow: 0 0 0 3px rgba(47, 195, 162, 0.12);
 }
 
-.registration-form input.is-invalid {
+.registration-input.is-invalid {
   border-color: #ff8f8f;
   box-shadow: 0 0 0 3px rgba(255, 143, 143, 0.12);
+}
+
+.registration-input:-webkit-autofill,
+.registration-input:-webkit-autofill:hover,
+.registration-input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--text-main);
+  -webkit-box-shadow: 0 0 0 1000px rgba(6, 12, 17, 0.98) inset;
+  transition: background-color 9999s ease-out 0s;
 }
 
 .registration-consent {
