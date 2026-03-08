@@ -23,7 +23,6 @@ Site institucional da comunidade **Hack in Brasil**, publicado com **GitHub Page
 - `.github/workflows/deploy-worker.yml`: deploy isolado do Cloudflare Worker
 - `CNAME`: domínio customizado do GitHub Pages
 - `workers/meetup-api/`: backend serverless para inscrições
-- `workers/site-security-headers/`: worker de borda para injetar headers de segurança no site estático
 
 ## Rodando localmente
 
@@ -55,13 +54,6 @@ Saída gerada em `_site/`.
 ## Deploy
 
 O deploy é feito automaticamente pelo GitHub Pages ao fazer push para a branch configurada no repositório.
-
-## Headers de segurança do site
-
-Como o GitHub Pages não permite configurar headers HTTP customizados no origin, este repositório inclui um Worker de borda da Cloudflare em `workers/site-security-headers` para injetar headers de segurança no domínio público (`hackinbrasil.com.br`).
-
-- Código e setup: `workers/site-security-headers/README.md`
-- Workflow de deploy: `.github/workflows/deploy-site-security-headers.yml`
 
 ## Dependabot
 
