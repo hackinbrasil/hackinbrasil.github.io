@@ -741,6 +741,12 @@ footer a {
   padding: 1rem 1.2rem;
 }
 
+.sponsor-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+}
+
 .sponsor-card img {
   width: 200px;
   height: auto;
