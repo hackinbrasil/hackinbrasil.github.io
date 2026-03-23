@@ -1,6 +1,7 @@
 # Meetup API Worker (Cloudflare)
 
 API serverless para inscrições de meetup, com limite de vagas rígido (sem lista de espera).
+Também agenda e envia e-mails de confirmação com atraso de 10 minutos.
 
 ## Endpoints
 
@@ -45,9 +46,11 @@ npx wrangler d1 migrations apply meetup_db --remote
 
 ```bash
 npx wrangler secret put DOC_ENCRYPTION_KEY_BASE64
+npx wrangler secret put RESEND_API_KEY
 ```
 
 `DOC_ENCRYPTION_KEY_BASE64` deve ser uma chave AES-256 em Base64 (32 bytes).
+`RESEND_API_KEY` é a chave privada da API do Resend.
 
 5. Deploy:
 
@@ -76,3 +79,11 @@ Comportamento de UX atual:
 - Consentimento obrigatório (`consentLgpd=true`).
 - CPF validado no frontend e no backend (estrutura + dígitos verificadores).
 - Recomenda-se adicionar captcha e política de retenção dos dados.
+
+## E-mails de confirmação
+
+- O e-mail é agendado no momento da inscrição para envio após 10 minutos.
+- O envio ocorre via trigger de cron do Worker (`*/2 * * * *`).
+- O conteúdo do e-mail é definido no banco em `email_templates`.
+- Inscrições antigas são carregadas para envio na primeira aplicação da migração `0002`.
+- Para editar próximas mensagens, atualize o registro em `email_templates`.

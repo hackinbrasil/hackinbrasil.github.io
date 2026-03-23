@@ -8,6 +8,7 @@ This project keeps a static Jekyll frontend and uses Cloudflare Workers + D1 for
 - Registrations are handled by Cloudflare Worker API.
 - Hard capacity limit is enforced server-side.
 - No waitlist.
+- Confirmation emails are sent via Resend after a 10-minute delay.
 
 ## Components
 
@@ -39,6 +40,34 @@ This project keeps a static Jekyll frontend and uses Cloudflare Workers + D1 for
 - `document_last4`
 - `consent_lgpd`
 - `created_at`
+
+### `email_templates`
+
+- `id` (PK)
+- `meetup_slug` (UNIQUE, FK)
+- `subject`
+- `text_body`
+- `html_body`
+- `created_at`, `updated_at`
+
+### `email_jobs`
+
+- `id` (PK)
+- `meetup_slug` (FK)
+- `template_id` (FK)
+- `registration_id` (UNIQUE, FK)
+- `recipient_name`
+- `recipient_email`
+- `subject`
+- `text_body`
+- `html_body`
+- `send_after`
+- `status` (`pending`, `processing`, `sent`, `failed`)
+- `attempts`
+- `last_error`
+- `resend_email_id`
+- `sent_at`
+- `created_at`, `updated_at`
 
 ## API
 
@@ -72,6 +101,10 @@ Responses:
 - `201` success
 - `409` when full or duplicate email
 - `400` validation errors
+
+Side effect:
+
+- Creates an email job scheduled to send after 10 minutes.
 
 ## Capacity enforcement (no waitlist)
 
@@ -119,6 +152,21 @@ npx wrangler secret put DOC_ENCRYPTION_KEY_BASE64
 npx wrangler deploy
 ```
 
+7. Configure Resend:
+
+```bash
+npx wrangler secret put RESEND_API_KEY
+```
+
+`wrangler.toml` vars used by sender:
+
+- `RESEND_FROM_EMAIL`
+- `RESEND_REPLY_TO` (optional)
+
+8. Cron trigger:
+
+- `*/2 * * * *` processes pending `email_jobs`.
+
 ## Frontend integration
 
 Form attributes in `meetup-25-03-2026.html`:
@@ -131,6 +179,12 @@ UX behavior:
 - Shows only "Inscrições abertas" or "Inscrições encerradas"
 - No spot counts displayed
 - Success/error shown in modal with close button
+
+## Email template management
+
+- The email content is stored in `email_templates`.
+- You can update future meetup messages directly in D1 by editing `subject`, `text_body`, and `html_body`.
+- Existing subscriptions were backfilled into `email_jobs` by migration `0002`.
 
 ## Troubleshooting
 

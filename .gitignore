@@ -1,2 +1,4 @@
 .gem/
 _site/
+.wrangler/
+workers/meetup-api/node_modules/

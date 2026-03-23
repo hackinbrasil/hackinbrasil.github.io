@@ -9,6 +9,12 @@ database_id = "e3d3e3e7-2ba1-47f8-a4a3-6c34bd1e7ebc"
 
 [vars]
 ALLOWED_ORIGIN = "https://hackinbrasil.com.br,https://www.hackinbrasil.com.br"
+RESEND_FROM_EMAIL = "Hack in Brasil <no-reply@hackinbrasil.com.br>"
+RESEND_REPLY_TO = "contato@hackinbrasil.com.br"
+
+[triggers]
+crons = ["*/2 * * * *"]
 
 # Required secrets (set with `wrangler secret put`):
 # DOC_ENCRYPTION_KEY_BASE64
+# RESEND_API_KEY
