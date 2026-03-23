@@ -398,49 +398,25 @@ async function handleRegister(request, env, slug, corsOrigin) {
     return json({error: "Falha ao criar agendamento de confirmação"}, 500, corsOrigin);
   }
 
-  const emailTemplate = await getEmailTemplateByMeetupSlug(env.DB, slug);
-  if (!emailTemplate) {
-    await env.DB
-      .prepare("DELETE FROM registrations WHERE id = ?")
-      .bind(registrationId)
-      .run();
-
-    await env.DB
-      .prepare(
-        "UPDATE meetups SET registrations_count = CASE WHEN registrations_count > 0 THEN registrations_count - 1 ELSE 0 END, updated_at = CURRENT_TIMESTAMP WHERE slug = ?"
-      )
-      .bind(slug)
-      .run();
-
-    return json({error: "Template de e-mail não configurado para este meetup"}, 500, corsOrigin);
-  }
-
+  let emailScheduled = false;
   try {
-    await queueConfirmationEmail(env, {
-      meetupSlug: slug,
-      templateId: Number(emailTemplate.id),
-      registrationId,
-      recipientName: name,
-      recipientEmail: email,
-      subject: String(emailTemplate.subject),
-      html: String(emailTemplate.html_body),
-      text: String(emailTemplate.text_body),
-      delayMinutes: 10
-    });
+    const emailTemplate = await getEmailTemplateByMeetupSlug(env.DB, slug);
+    if (emailTemplate) {
+      await queueConfirmationEmail(env, {
+        meetupSlug: slug,
+        templateId: Number(emailTemplate.id),
+        registrationId,
+        recipientName: name,
+        recipientEmail: email,
+        subject: String(emailTemplate.subject),
+        html: String(emailTemplate.html_body),
+        text: String(emailTemplate.text_body),
+        delayMinutes: 10
+      });
+      emailScheduled = true;
+    }
   } catch {
-    await env.DB
-      .prepare("DELETE FROM registrations WHERE id = ?")
-      .bind(registrationId)
-      .run();
-
-    await env.DB
-      .prepare(
-        "UPDATE meetups SET registrations_count = CASE WHEN registrations_count > 0 THEN registrations_count - 1 ELSE 0 END, updated_at = CURRENT_TIMESTAMP WHERE slug = ?"
-      )
-      .bind(slug)
-      .run();
-
-    return json({error: "Falha ao agendar e-mail de confirmação"}, 500, corsOrigin);
+    emailScheduled = false;
   }
 
   const updated = await getMeetupBySlug(env.DB, slug);
@@ -450,6 +426,7 @@ async function handleRegister(request, env, slug, corsOrigin) {
     {
       ok: true,
       message: "Inscrição realizada com sucesso",
+      emailScheduled,
       isFull
     },
     201,
