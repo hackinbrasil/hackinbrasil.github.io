@@ -80,6 +80,13 @@ async function getMeetupBySlug(db, slug) {
     .first();
 }
 
+async function getRegistrationByMeetupAndEmail(db, slug, email) {
+  return db
+    .prepare("SELECT id, document_encrypted FROM registrations WHERE meetup_slug = ? AND email = ?")
+    .bind(slug, email)
+    .first();
+}
+
 async function getEmailTemplateByMeetupSlug(db, slug) {
   return db
     .prepare("SELECT id, subject, text_body, html_body FROM email_templates WHERE meetup_slug = ?")
@@ -120,6 +127,18 @@ async function encryptDocument(document, env) {
   payload.set(iv, 0);
   payload.set(new Uint8Array(cipher), iv.length);
   return bytesToBase64(payload);
+}
+
+async function decryptDocument(encryptedPayload, env) {
+  const key = await importAesKey(env);
+  const payload = base64ToBytes(encryptedPayload);
+  if (payload.byteLength <= 12) {
+    throw new Error("Invalid encrypted document payload");
+  }
+  const iv = payload.slice(0, 12);
+  const cipher = payload.slice(12);
+  const plainBuffer = await crypto.subtle.decrypt({name: "AES-GCM", iv}, key, cipher);
+  return new TextDecoder().decode(plainBuffer);
 }
 
 async function queueConfirmationEmail(env, payload) {
@@ -364,6 +383,31 @@ async function handleRegister(request, env, slug, corsOrigin) {
       .run();
 
     if (message.includes("UNIQUE constraint failed: registrations.meetup_slug, registrations.email")) {
+      try {
+        const existingRegistration = await getRegistrationByMeetupAndEmail(env.DB, slug, email);
+        if (existingRegistration) {
+          const existingDocument = await decryptDocument(
+            String(existingRegistration.document_encrypted),
+            env
+          );
+          if (normalizeDocument(existingDocument) === document) {
+            const updated = await getMeetupBySlug(env.DB, slug);
+            const isFull = updated.registrations_count >= updated.capacity || updated.is_open !== 1;
+            return json(
+              {
+                ok: true,
+                message: "Inscrição realizada com sucesso",
+                emailScheduled: false,
+                isFull
+              },
+              201,
+              corsOrigin
+            );
+          }
+        }
+      } catch {
+        return json({error: "Não foi possível concluir a inscrição"}, 409, corsOrigin);
+      }
       return json({error: "Não foi possível concluir a inscrição"}, 409, corsOrigin);
     }
     return json({error: "Falha ao registrar inscrição"}, 500, corsOrigin);
