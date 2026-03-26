@@ -3,6 +3,10 @@ description: "Comunidade brasileira de cibersegurança"
 lang: pt-BR
 timezone: America/Sao_Paulo
 markdown: kramdown
+collections:
+  blog:
+    output: true
+    permalink: /blog/:name/
 plugins: []
 exclude:
   - README.md

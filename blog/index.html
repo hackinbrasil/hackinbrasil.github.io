@@ -1,0 +1,57 @@
+---
+layout: default
+title: Blog | Hack in Brasil
+permalink: /blog/
+---
+<header class="nav">
+  <div class="nav-left">
+    <a class="nav-brand" href="{{ '/' | relative_url }}">
+      <img class="nav-logo" src="{{ '/assets/images/hackinbrasil.png' | relative_url }}" alt="Logo Hack in Brasil">
+      <span>Hack in Brasil</span>
+    </a>
+    <span class="nav-logo-tag">Blog</span>
+  </div>
+  <nav class="nav-right nav-right-static">
+    <a class="nav-link" href="{{ '/' | relative_url }}">Início</a>
+  </nav>
+</header>
+
+<main class="blog-page">
+  <section class="blog-hero">
+    <p class="hero-kicker">Conteúdo da comunidade</p>
+    <h1 class="blog-heading">Blog Hack in Brasil</h1>
+    <p class="blog-subheading">
+      Artigos sobre cibersegurança, comunidade e aprendizados dos nossos encontros.
+    </p>
+  </section>
+
+  <section class="blog-list" aria-label="Lista de artigos">
+    {% assign posts = site.blog | sort: "date" | reverse %}
+    {% if posts.size > 0 %}
+      {% for post in posts %}
+        <article class="blog-card">
+          <p class="blog-meta">
+            {{ post.date | date: "%d/%m/%Y" }}
+            {% if post.author %}· {{ post.author }}{% endif %}
+          </p>
+          <h2 class="blog-card-title">
+            <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
+          </h2>
+          {% if post.description %}
+            <p class="blog-card-description">{{ post.description }}</p>
+          {% elsif post.excerpt %}
+            <p class="blog-card-description">{{ post.excerpt | strip_html | truncate: 170 }}</p>
+          {% endif %}
+          <a class="blog-read-link" href="{{ post.url | relative_url }}">Ler artigo</a>
+        </article>
+      {% endfor %}
+    {% else %}
+      <article class="blog-card">
+        <h2 class="blog-card-title">Nenhum artigo publicado ainda</h2>
+        <p class="blog-card-description">
+          Crie arquivos em <code>_blog/</code> para que eles aparecam aqui automaticamente.
+        </p>
+      </article>
+    {% endif %}
+  </section>
+</main>
