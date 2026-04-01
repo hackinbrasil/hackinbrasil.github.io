@@ -246,6 +246,36 @@ title: Hack in Brasil — Comunidade de Segurança da Informação
     </div>
   </section>
 
+  {% assign past_speakers = site.static_files | where_exp: "file", "file.path contains '/assets/images/past speakers/'" | sort: "path" %}
+  <section class="past-speakers" aria-labelledby="past-speakers-title">
+    <div class="past-speakers-header">
+      <h2 class="past-speakers-title" id="past-speakers-title">Palestrantes de edições anteriores</h2>
+      <p class="past-speakers-subtitle">Profissionais que compartilharam conhecimento com a comunidade</p>
+    </div>
+    <div class="past-speakers-track-wrap">
+      <div class="past-speakers-track">
+        <div class="past-speakers-group">
+          {% for speaker in past_speakers %}
+            {% assign speaker_name = speaker.name | remove: '.jpg' | remove: '.jpeg' | remove: '.png' | remove: '.webp' | remove: '_jpg' | replace: '_', ' ' %}
+            <article class="past-speaker-card">
+              <img src="{{ speaker.path | replace: ' ', '%20' | relative_url }}" alt="Foto de {{ speaker_name }}">
+              <h3>{{ speaker_name }}</h3>
+            </article>
+          {% endfor %}
+        </div>
+        <div class="past-speakers-group" aria-hidden="true">
+          {% for speaker in past_speakers %}
+            {% assign speaker_name = speaker.name | remove: '.jpg' | remove: '.jpeg' | remove: '.png' | remove: '.webp' | remove: '_jpg' | replace: '_', ' ' %}
+            <article class="past-speaker-card">
+              <img src="{{ speaker.path | replace: ' ', '%20' | relative_url }}" alt="">
+              <h3>{{ speaker_name }}</h3>
+            </article>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="community-supporters" aria-labelledby="community-supporters-title">
     <div class="community-supporters-header">
       <h2 class="community-supporters-title" id="community-supporters-title">Quem apoiou a comunidade</h2>
