@@ -1,0 +1,137 @@
+---
+layout: default
+title: Meetup Hack in Brasil | 25/04/2026
+permalink: /meetup-25-04-2026/
+---
+<header class="nav">
+  <div class="nav-left">
+    <a class="nav-brand" href="{{ '/' | relative_url }}">
+      <img class="nav-logo" src="{{ '/assets/images/hackinbrasil.png' | relative_url }}" alt="Logo Hack in Brasil">
+      <span>Hack in Brasil</span>
+    </a>
+    <span class="nav-logo-tag">Meetup</span>
+  </div>
+  <nav class="nav-right nav-right-static">
+    <a class="nav-link" href="{{ '/' | relative_url }}">Voltar para início</a>
+  </nav>
+</header>
+
+<main class="meetup-page">
+  <section class="meetup-card">
+    <p class="hero-kicker">Próximo encontro</p>
+    <h1 class="meetup-title">Meetup de Cibersegurança - 25/04/2026</h1>
+    <p class="meetup-subtitle">
+      Encontro da comunidade para compartilhar experiências e conhecimento em segurança da informação.
+    </p>
+    <p class="speaker-role">Horário: 10h às 13h</p>
+  </section>
+
+  <section class="meetup-card">
+    <h2>Agenda e Palestrantes</h2>
+    <p class="meetup-subtitle">Início às 10h e encerramento às 13h.</p>
+    <div class="talks-grid">
+      <article class="talk-card">
+        <p class="talk-time">10:00</p>
+        <h3>Palestra 1</h3>
+        <p>Slot reservado para a primeira palestra do meetup.</p>
+      </article>
+
+      <article class="talk-card">
+        <p class="talk-time">10:50</p>
+        <h3>Palestra 2</h3>
+        <p>Slot reservado para a segunda palestra do meetup.</p>
+      </article>
+
+      <article class="talk-card">
+        <p class="talk-time">11:40</p>
+        <h3>Coffee break</h3>
+        <p>Pausa para networking, troca de ideias e conexão entre participantes.</p>
+      </article>
+
+      <article class="talk-card">
+        <p class="talk-time">12:00</p>
+        <h3>Palestra 3</h3>
+        <p>Slot reservado para a terceira palestra do meetup.</p>
+      </article>
+
+      <article class="talk-card">
+        <p class="talk-time">12:50</p>
+        <h3>Encerramento</h3>
+        <p>Agradecimentos finais e fechamento das atividades às 13h.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="meetup-card">
+    <h2>Inscrição</h2>
+    <p class="meetup-subtitle" id="registration-status">
+      Carregando disponibilidade...
+    </p>
+    <form id="meetup-registration-form" class="registration-form" data-api-base="https://hackinbrasil-meetup-api.hi-c21.workers.dev" data-meetup-slug="meetup-25-04-2026">
+      <div class="registration-field">
+        <label for="reg-name">Nome completo</label>
+        <input id="reg-name" class="registration-input" type="text" name="name" placeholder="Ex.: Bruno Almeida" required>
+      </div>
+      <div class="registration-field">
+        <label for="reg-email">E-mail</label>
+        <input id="reg-email" class="registration-input" type="email" name="email" placeholder="exemplo@dominio.com" required>
+      </div>
+      <div class="registration-field registration-field-full">
+        <label for="reg-document">Documento</label>
+        <input id="reg-document" class="registration-input" type="text" name="document" placeholder="000.000.000-00" inputmode="numeric" maxlength="14" required>
+        <small id="cpf-help" class="registration-help">Apenas CPF válido será aceito.</small>
+      </div>
+      <label class="registration-consent">
+        <input type="checkbox" name="consentLgpd" required>
+        Autorizo o uso dos meus dados para gestão da inscrição e para
+        comunicações relacionadas a este meetup, conforme a
+        <a href="{{ '/politica-de-privacidade/' | relative_url }}" target="_blank" rel="noopener noreferrer">Política de Privacidade</a>.
+      </label>
+      <div class="registration-actions">
+        <button class="btn btn-primary" type="submit" id="registration-submit">
+          Inscrever-se
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <section class="meetup-card">
+    <h2>Patrocínio</h2>
+    <div class="sponsor-list">
+      <a class="sponsor-card sponsor-link" href="https://www.colegioniteroi.g12.br/" target="_blank" rel="noopener noreferrer" aria-label="Abrir site do Colégio Niterói">
+        <img src="https://static.wixstatic.com/media/93360a_72824797b5094e9db75ce866a0e2c68e~mv2.png/v1/crop/x_0,y_28,w_2601,h_1159/fill/w_368,h_164,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/logo%20site%20sem%20fundo.png" alt="Logo Colégio Niterói">
+      </a>
+      <a class="sponsor-card sponsor-link" href="https://vantico.com.br" target="_blank" rel="noopener noreferrer" aria-label="Abrir site da Vantico">
+        <img src="{{ '/assets/images/sponsors/vantico.svg' | relative_url }}" alt="Logo Vantico">
+      </a>
+    </div>
+  </section>
+
+  <section class="meetup-card">
+    <h2>Local do Meetup</h2>
+    <p><strong>Endereço completo:</strong> Colégio Niterói 1994 - 2020 - Todos os direitos Reservados, R. Vereador José Vicente Sobrinho, 269, Barreto, CEP: 24110-441, Niterói - RJ</p>
+    <p>
+      <a class="meetup-map-link" href="https://maps.google.com/?q=Colegio+Niteroi+R.+Vereador+Jose+Vicente+Sobrinho+269+Barreto+Niteroi+RJ+24110-441" target="_blank" rel="noopener noreferrer">
+        Abrir no Google Maps
+      </a>
+    </p>
+    <div class="meetup-map">
+      <iframe
+        title="Mapa do local do meetup"
+        src="https://maps.google.com/maps?q=Colegio%20Niteroi%20R.%20Vereador%20Jose%20Vicente%20Sobrinho%20269%20Barreto%20Niteroi%20RJ%2024110-441&t=&z=15&ie=UTF8&iwloc=&output=embed"
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade">
+      </iframe>
+    </div>
+  </section>
+</main>
+
+<div class="modal" id="registrationFeedbackModal" aria-hidden="true">
+  <div class="modal-content modal-content--feedback">
+    <button class="modal-close" data-close aria-label="Fechar">✕</button>
+    <h3 id="registration-feedback-title" class="registration-feedback-title"></h3>
+    <p id="registration-feedback-message" class="registration-feedback-message"></p>
+  </div>
+</div>
+
+<script src="{{ '/assets/js/meetup-registration.js' | relative_url }}"></script>
