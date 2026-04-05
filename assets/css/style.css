@@ -1089,6 +1089,27 @@ footer a {
   line-height: 1.5;
 }
 
+.registration-feedback-whatsapp-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.6rem;
+  padding: 0.5rem 0.85rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(47, 195, 162, 0.45);
+  background: rgba(47, 195, 162, 0.16);
+  color: #7de0ca;
+  font-weight: 600;
+  text-decoration: none;
+  transition: var(--transition-fast);
+}
+
+.registration-feedback-whatsapp-link:hover {
+  background: rgba(47, 195, 162, 0.24);
+  border-color: rgba(47, 195, 162, 0.75);
+  color: #b5f4e7;
+}
+
 #registrationFeedbackModal.is-success .registration-feedback-title {
   color: #2fc3a2;
 }

@@ -34,10 +34,12 @@
     whatsappInviteLink.href = whatsappInviteUrl;
     whatsappInviteLink.target = "_blank";
     whatsappInviteLink.rel = "noopener noreferrer";
-    whatsappInviteLink.textContent = "grupo no WhatsApp";
+    whatsappInviteLink.className = "registration-feedback-whatsapp-link";
+    whatsappInviteLink.setAttribute("aria-label", "Entrar no grupo do WhatsApp");
+    whatsappInviteLink.textContent = "Entrar no grupo do WhatsApp";
 
+    feedbackMessage.append(document.createElement("br"));
     feedbackMessage.append(whatsappInviteLink);
-    feedbackMessage.append(".");
 
     feedbackModal.classList.remove("is-success", "is-error");
     feedbackModal.classList.add("is-success");
