@@ -2,3 +2,4 @@
 _site/
 .wrangler/
 workers/meetup-api/node_modules/
+.DS_Store
