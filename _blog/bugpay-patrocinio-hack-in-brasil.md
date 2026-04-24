@@ -1,13 +1,13 @@
 ---
 layout: blog_post
-title: "BUGPAY e Hack in Rio: patrocínio, comunidade e formação de talentos"
+title: "BUGPAY e Hack in Brasil: patrocínio, comunidade e formação de talentos"
 date: 2026-04-10
 author: "Equipe Hack in Brasil"
-description: "Em entrevista, a BUGPAY explica por que apoia o Hack in Rio e como eventos comunitários fortalecem marca, networking e a formação de novos talentos em cibersegurança."
+description: "Em entrevista, a BUGPAY explica por que apoia o Hack in Brasil e como eventos comunitários fortalecem marca, networking e a formação de novos talentos em cibersegurança."
 ---
 
 A [BUGPAY](https://www.bugpay.com.br), plataforma de segurança
-colaborativa, apoia o Hack in Rio a partir de uma convicção simples:
+colaborativa, apoia o Hack in Brasil a partir de uma convicção simples:
 é dentro da comunidade que surgem muitos dos principais talentos,
 conexões e oportunidades do ecossistema de cibersegurança.
 
@@ -16,12 +16,12 @@ os valores da marca, quais retornos já apareceram na prática e por que
 eventos comunitários seguem sendo parte importante da formação de novos
 profissionais.
 
-<figure class="blog-person-figure">
+<figure class="blog-person-figure blog-person-figure-cover">
   <img class="blog-person-photo" src="{{ '/assets/images/bugpay-cover.jpg' | relative_url }}" alt="Representantes da BUGPAY em evento de cibersegurança">
 </figure>
 
 <figure class="blog-sponsor-figure">
-  <img class="blog-sponsor-logo" src="{{ '/assets/images/sponsors/bugpay.png' | relative_url }}" alt="Logo da BUGPAY">
+  <img class="blog-sponsor-logo" src="{{ '/assets/images/sponsors/bugpay-logo.png' | relative_url }}" alt="Logo da BUGPAY">
 </figure>
 
 ## Comunidade como ponto de partida
@@ -31,7 +31,7 @@ premissa da empresa. A leitura é direta: ambientes colaborativos
 concentram troca real, aprendizado contínuo e uma circulação de pessoas
 que ajudam a mover o setor adiante.
 
-Esse posicionamento também explica por que o apoio ao Hack in Rio
+Esse posicionamento também explica por que o apoio ao Hack in Brasil
 está alinhado com o principal valor da marca: a crença de que a
 segurança cibernética evolui de forma coletiva. Mais do que visibilidade
 institucional, a parceria é vista como uma forma de participar de um
@@ -40,7 +40,7 @@ ecossistema que impulsiona conhecimento e crescimento mútuo.
 ## Branding, visibilidade e presença no público técnico
 
 Como marca nova e bootstrap, a BUGPAY destaca que iniciativas como o
-Hack in Rio criam uma oportunidade importante de branding e
+Hack in Brasil criam uma oportunidade importante de branding e
 posicionamento. Estar presente em um ambiente frequentado por futuros
 pesquisadores e profissionais de segurança ajuda a apresentar o projeto
 para o público certo, no contexto certo.
@@ -95,7 +95,7 @@ mais amplos ao longo do tempo.
 
 Na avaliação da BUGPAY, comunidades técnicas continuam sendo o principal
 ambiente de formação real de talentos em segurança da informação e em
-tecnologia de forma mais ampla. Sem encontros como Hack in Rio,
+tecnologia de forma mais ampla. Sem encontros como Hack in Brasil,
 BSides, Hacking na Web Day e outros eventos do ecossistema, muitos
 profissionais teriam menos acesso a conteúdos, referências e pessoas
 capazes de transformar suas trajetórias.
