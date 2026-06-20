@@ -4,7 +4,7 @@ ruby "~> 3.2.0"
 
 gem "github-pages", group: :jekyll_plugins
 
-gem "faraday", "2.14.2"
+gem "faraday", "2.14.3"
 
 # Needed for local `bundle exec jekyll serve`
 gem "webrick", "~> 1.8"
