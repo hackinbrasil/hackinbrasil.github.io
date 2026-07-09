@@ -7,6 +7,8 @@
   const feedbackMessage = document.getElementById("registration-feedback-message");
   const cpfInput = document.getElementById("reg-document");
   const cpfHelp = document.getElementById("cpf-help");
+  const captchaInput = document.getElementById("reg-captcha");
+  const captchaQuestion = document.getElementById("captcha-question");
 
   if (!form || !status || !submit || !feedbackModal || !feedbackTitle || !feedbackMessage || !cpfInput || !cpfHelp) return;
 
@@ -103,6 +105,32 @@
     setCpfErrorState(!isValidCpf(cpfInput.value));
   });
 
+  let captchaAnswer = null;
+
+  function renderCaptcha() {
+    if (!captchaQuestion) return;
+    const a = Math.floor(Math.random() * 9) + 1;
+    const b = Math.floor(Math.random() * 9) + 1;
+    const isAddition = Math.random() < 0.5;
+    let left = a;
+    let right = b;
+    if (!isAddition && left < right) {
+      const temp = left;
+      left = right;
+      right = temp;
+    }
+    captchaAnswer = isAddition ? left + right : left - right;
+    captchaQuestion.textContent = `${left} ${isAddition ? "+" : "−"} ${right}`;
+    if (captchaInput) captchaInput.value = "";
+  }
+
+  function isCaptchaValid() {
+    if (!captchaInput || captchaAnswer === null) return true;
+    const value = captchaInput.value.trim();
+    if (value === "") return false;
+    return Number(value) === captchaAnswer;
+  }
+
   function setClosedState(message) {
     status.textContent = message;
     submit.disabled = true;
@@ -157,6 +185,13 @@
     }
 
     setCpfErrorState(false);
+
+    if (!isCaptchaValid()) {
+      setFeedback("Resposta da verificação incorreta. Resolva a nova operação e tente novamente.", "error");
+      renderCaptcha();
+      return;
+    }
+
     payload.document = onlyDigits(payload.document);
 
     submit.disabled = true;
@@ -192,6 +227,7 @@
       setSuccessFeedbackWithWhatsappInvite();
       form.reset();
       setCpfErrorState(false);
+      renderCaptcha();
 
       if (data.isFull) {
         setClosedState("Inscrições encerradas. Limite de participantes atingido.");
@@ -205,5 +241,6 @@
     }
   });
 
+  renderCaptcha();
   refreshStatus();
 })();

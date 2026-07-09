@@ -139,6 +139,11 @@ permalink: /meetup-25-03-2026/
         <input id="reg-document" class="registration-input" type="text" name="document" placeholder="000.000.000-00" inputmode="numeric" maxlength="14" required>
         <small id="cpf-help" class="registration-help">Apenas CPF válido será aceito.</small>
       </div>
+      <div class="registration-field registration-field-full">
+        <label for="reg-captcha">Verificação: quanto é <span id="captcha-question"></span>?</label>
+        <input id="reg-captcha" class="registration-input" type="text" name="captcha" inputmode="numeric" autocomplete="off" placeholder="Resultado" required>
+        <small class="registration-help">Resolva a operação para confirmar que você não é um robô.</small>
+      </div>
       <label class="registration-consent">
         <input type="checkbox" name="consentLgpd" required>
         Autorizo o uso dos meus dados para gestão da inscrição e para
