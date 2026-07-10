@@ -67,6 +67,17 @@ function isValidCpf(document) {
   return secondDigit === Number(cpf[10]);
 }
 
+function normalizePhone(phone) {
+  let digits = String(phone || "").replace(/\D+/g, "");
+  if (digits.length === 13 && digits.startsWith("55")) digits = digits.slice(2);
+  return digits;
+}
+
+// Brazilian mobile: DDD (2 digits, no leading zero) + 9 + 8 digits.
+function isValidBrazilMobile(nationalDigits) {
+  return /^[1-9][1-9]9\d{8}$/.test(nationalDigits);
+}
+
 function truncateError(value, maxLength = 500) {
   const text = String(value || "");
   if (text.length <= maxLength) return text;
@@ -315,6 +326,8 @@ async function handleRegister(request, env, slug, corsOrigin) {
   const name = String(body.name || "").trim();
   const email = String(body.email || "").trim().toLowerCase();
   const document = normalizeDocument(body.document);
+  const phoneNational = normalizePhone(body.phone);
+  const phone = `+55${phoneNational}`;
   const consentLgpd = body.consentLgpd === true;
 
   if (!name || name.length < 3) {
@@ -325,6 +338,9 @@ async function handleRegister(request, env, slug, corsOrigin) {
   }
   if (!isValidCpf(document)) {
     return json({error: "CPF inválido"}, 400, corsOrigin);
+  }
+  if (!isValidBrazilMobile(phoneNational)) {
+    return json({error: "Número de celular inválido"}, 400, corsOrigin);
   }
   if (!consentLgpd) {
     return json({error: "Consentimento LGPD é obrigatório"}, 400, corsOrigin);
@@ -366,9 +382,9 @@ async function handleRegister(request, env, slug, corsOrigin) {
   try {
     const inserted = await env.DB
       .prepare(
-        "INSERT INTO registrations (meetup_slug, name, email, document_encrypted, document_last4, consent_lgpd) VALUES (?, ?, ?, ?, ?, 1)"
+        "INSERT INTO registrations (meetup_slug, name, email, phone, document_encrypted, document_last4, consent_lgpd) VALUES (?, ?, ?, ?, ?, ?, 1)"
       )
-      .bind(slug, name, email, encryptedDocument, documentLast4)
+      .bind(slug, name, email, phone, encryptedDocument, documentLast4)
       .run();
 
     registrationId = Number(inserted.meta?.last_row_id || 0);

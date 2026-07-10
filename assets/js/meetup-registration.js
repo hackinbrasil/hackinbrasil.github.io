@@ -9,6 +9,8 @@
   const cpfHelp = document.getElementById("cpf-help");
   const captchaInput = document.getElementById("reg-captcha");
   const captchaQuestion = document.getElementById("captcha-question");
+  const phoneInput = document.getElementById("reg-phone");
+  const phoneHelp = document.getElementById("phone-help");
 
   if (!form || !status || !submit || !feedbackModal || !feedbackTitle || !feedbackMessage || !cpfInput || !cpfHelp) return;
 
@@ -123,6 +125,47 @@
     setCpfErrorState(!isValidCpf(cpfInput.value));
   });
 
+  // Brazilian mobile phone: national number is DDD (2 digits) + 9 + 8 digits.
+  // Country code +55 is fixed and added on submit. Presented as "(11) 912345678".
+  function normalizePhone(value) {
+    let digits = onlyDigits(value);
+    if (digits.length === 13 && digits.startsWith("55")) digits = digits.slice(2);
+    return digits.slice(0, 11);
+  }
+
+  function formatPhone(value) {
+    const digits = normalizePhone(value);
+    if (digits.length === 0) return "";
+    if (digits.length <= 2) return `(${digits}`;
+    return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+  }
+
+  function isValidBrazilPhone(value) {
+    return /^[1-9][1-9]9\d{8}$/.test(normalizePhone(value));
+  }
+
+  function setPhoneErrorState(isInvalid) {
+    if (!phoneInput) return;
+    phoneInput.classList.toggle("is-invalid", isInvalid);
+    if (phoneHelp) {
+      phoneHelp.classList.toggle("is-error", isInvalid);
+      phoneHelp.textContent = isInvalid
+        ? "Número de celular inválido. Use DDD + número, ex.: (11) 912345678."
+        : "DDD + número, com +55 (Brasil). Ex.: (11) 912345678.";
+    }
+  }
+
+  if (phoneInput) {
+    phoneInput.addEventListener("input", function () {
+      phoneInput.value = formatPhone(phoneInput.value);
+      if (normalizePhone(phoneInput.value).length < 11) {
+        setPhoneErrorState(false);
+        return;
+      }
+      setPhoneErrorState(!isValidBrazilPhone(phoneInput.value));
+    });
+  }
+
   let captchaAnswer = null;
 
   function renderCaptcha() {
@@ -204,6 +247,15 @@
 
     setCpfErrorState(false);
 
+    if (phoneInput) {
+      if (!isValidBrazilPhone(phoneInput.value)) {
+        setPhoneErrorState(true);
+        setFeedback("Número de celular inválido. Use DDD + número, ex.: (11) 912345678.", "error");
+        return;
+      }
+      setPhoneErrorState(false);
+    }
+
     if (!isCaptchaValid()) {
       setFeedback("Resposta da verificação incorreta. Resolva a nova operação e tente novamente.", "error");
       renderCaptcha();
@@ -211,6 +263,9 @@
     }
 
     payload.document = onlyDigits(payload.document);
+    if (phoneInput) {
+      payload.phone = `+55${normalizePhone(phoneInput.value)}`;
+    }
 
     submit.disabled = true;
     submit.textContent = "Enviando...";
@@ -245,6 +300,7 @@
       setSuccessFeedbackWithWhatsappInvite();
       form.reset();
       setCpfErrorState(false);
+      setPhoneErrorState(false);
       renderCaptcha();
 
       if (data.isFull) {

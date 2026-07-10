@@ -36,6 +36,7 @@ This project keeps a static Jekyll frontend and uses Cloudflare Workers + D1 for
 - `meetup_slug` (FK)
 - `name`
 - `email`
+- `phone` (E.164, e.g. `+5511912345678`; added in migration `0005`)
 - `document_encrypted`
 - `document_last4`
 - `consent_lgpd`
@@ -87,12 +88,14 @@ Request JSON:
 
 - `name`
 - `email`
+- `phone` (Brazilian mobile; `+55` is added server-side)
 - `document` (CPF only)
 - `consentLgpd` (must be `true`)
 
 Validation:
 
 - Name and email format
+- Phone: Brazilian mobile — DDD (2 digits) + `9` + 8 digits
 - CPF structure + check digits
 - LGPD consent required
 

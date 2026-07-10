@@ -107,6 +107,11 @@ permalink: /meetup-03-09-2026/
         <input id="reg-email" class="registration-input" type="email" name="email" placeholder="exemplo@dominio.com" required>
       </div>
       <div class="registration-field registration-field-full">
+        <label for="reg-phone">Celular (WhatsApp)</label>
+        <input id="reg-phone" class="registration-input" type="tel" name="phone" placeholder="(11) 912345678" inputmode="numeric" autocomplete="tel-national" maxlength="15" required>
+        <small id="phone-help" class="registration-help">DDD + número, com +55 (Brasil). Ex.: (11) 912345678.</small>
+      </div>
+      <div class="registration-field registration-field-full">
         <label for="reg-document">Documento</label>
         <input id="reg-document" class="registration-input" type="text" name="document" placeholder="000.000.000-00" inputmode="numeric" maxlength="14" required>
         <small id="cpf-help" class="registration-help">Apenas CPF válido será aceito.</small>
