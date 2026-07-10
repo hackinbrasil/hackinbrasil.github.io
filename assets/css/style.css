@@ -476,6 +476,8 @@ a {
   border-radius: 12px;
   border: 1px solid var(--border-soft);
   background: rgba(5, 10, 14, 0.65);
+  color: inherit;
+  text-decoration: none;
   transition: border-color var(--transition-fast), transform var(--transition-fast);
 }
 
@@ -1532,4 +1534,80 @@ footer a {
   .blog-article {
     padding: 1.1rem;
   }
+}
+
+/* Dedicated pages: sponsors, supporters, speakers */
+.entity-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 1.6rem;
+  margin-bottom: 1.4rem;
+  max-width: 320px;
+}
+
+.entity-logo img {
+  max-width: 100%;
+  max-height: 120px;
+  object-fit: contain;
+}
+
+.speaker-detail-photo {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--border-soft);
+  margin-bottom: 1.2rem;
+}
+
+.entity-meetup-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.entity-meetup-list li a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.entity-meetup-list li a:hover {
+  text-decoration: underline;
+}
+
+/* Related speakers on a meetup page */
+.edition-speakers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+/* Meetup photos & videos gallery */
+.meetup-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.meetup-gallery img,
+.meetup-gallery video,
+.meetup-gallery iframe {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid var(--border-soft);
+  display: block;
+}
+
+.meetup-gallery-empty {
+  color: var(--text-muted);
 }

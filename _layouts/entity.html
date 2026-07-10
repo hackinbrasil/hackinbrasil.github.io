@@ -1,0 +1,52 @@
+---
+layout: default
+---
+<header class="nav">
+  <div class="nav-left">
+    <a class="nav-brand" href="{{ '/' | relative_url }}">
+      <img class="nav-logo" src="{{ '/assets/images/hackinbrasil.png' | relative_url }}" alt="Logo Hack in Brasil">
+      <span>Hack in Brasil</span>
+    </a>
+    <span class="nav-logo-tag">{{ page.entity_label | default: "Parceiro" }}</span>
+  </div>
+  <nav class="nav-right nav-right-static">
+    <a class="nav-link" href="{{ '/' | relative_url }}">Voltar para início</a>
+  </nav>
+</header>
+
+<main class="meetup-page">
+  <section class="meetup-card">
+    <p class="hero-kicker">{{ page.entity_label | default: "Parceiro" }}</p>
+    {% if page.logo %}
+      <div class="entity-logo">
+        <img src="{{ page.logo | replace: ' ', '%20' | relative_url }}" alt="Logo {{ page.name }}">
+      </div>
+    {% endif %}
+    <h1 class="meetup-title">{{ page.name }}</h1>
+    {% if page.site %}
+      <p class="meetup-subtitle">
+        <a class="meetup-map-link" href="{{ page.site }}" target="_blank" rel="noopener noreferrer">Visitar site</a>
+      </p>
+    {% endif %}
+    {% assign body = content | strip %}
+    {% if body != "" %}
+      <div class="blog-article-content">{{ content }}</div>
+    {% else %}
+      <p class="meetup-subtitle">Descrição em breve.</p>
+    {% endif %}
+  </section>
+
+  {% if page.meetups and page.meetups != empty %}
+    <section class="meetup-card">
+      <h2>Participação em meetups</h2>
+      <ul class="entity-meetup-list">
+        {% for slug in page.meetups %}
+          {% assign m = site.data.meetups | where: "slug", slug | first %}
+          {% if m %}
+            <li><a href="{{ m.url | relative_url }}">{{ m.title }}</a></li>
+          {% endif %}
+        {% endfor %}
+      </ul>
+    </section>
+  {% endif %}
+</main>

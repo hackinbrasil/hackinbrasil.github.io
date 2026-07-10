@@ -82,65 +82,22 @@ title: Hack in Brasil — Comunidade de Segurança da Informação
       <h2 class="past-sponsors-title" id="past-sponsors-title">Patrocinadores de edições anteriores</h2>
       <p class="past-sponsors-subtitle">Empresas que já fortaleceram a comunidade Hack in Brasil</p>
     </div>
+    {% assign wall_sponsors = site.sponsors | where_exp: "s", "s.wall" | sort: "order" %}
     <div class="past-sponsors-track-wrap">
       <div class="past-sponsors-track">
         <div class="past-sponsors-group">
-          <a class="past-sponsor-card" href="https://www.bugpay.com.br" target="_blank" rel="noopener noreferrer" aria-label="Abrir site da BugPay">
-            <img src="{{ '/assets/images/sponsors/bugpay-logo.png' | relative_url }}" alt="Logo BugPay">
-          </a>
-          <a class="past-sponsor-card" href="https://bughunt.com.br" target="_blank" rel="noopener noreferrer" aria-label="Abrir site da BugHunt">
-            <img src="{{ '/assets/images/sponsors/bughunt.png' | relative_url }}" alt="Logo BugHunt">
-          </a>
-          <a class="past-sponsor-card" href="https://www.qvsaude.com.br" target="_blank" rel="noopener noreferrer" aria-label="Abrir site da QV Saude">
-            <img src="{{ '/assets/images/sponsors/qv-saude.png' | relative_url }}" alt="Logo QV Saude">
-          </a>
-          <a class="past-sponsor-card" href="https://vantico.com.br" target="_blank" rel="noopener noreferrer" aria-label="Abrir site da Vantico">
-            <img src="{{ '/assets/images/sponsors/vantico-new-logo.jpg' | relative_url }}" alt="Logo Vantico">
-          </a>
-          <a class="past-sponsor-card" href="https://ops.team/en/" target="_blank" rel="noopener noreferrer" aria-label="Abrir site da OPS Team">
-            <img src="{{ '/assets/images/sponsors/ops-team.svg' | relative_url }}" alt="Logo OPS Team">
-          </a>
-          <a class="past-sponsor-card" href="https://42.rio" target="_blank" rel="noopener noreferrer" aria-label="Abrir site da 42 Rio">
-            <img src="{{ '/assets/images/sponsors/42-rio.webp' | relative_url }}" alt="Logo 42 Rio">
-          </a>
-          <a class="past-sponsor-card" href="https://impulso.team/pt" target="_blank" rel="noopener noreferrer" aria-label="Abrir site da Impulso">
-            <img src="{{ '/assets/images/sponsors/impulso.svg' | relative_url }}" alt="Logo Impulso">
-          </a>
-          <a class="past-sponsor-card" href="https://www.fiap.com.br/" target="_blank" rel="noopener noreferrer" aria-label="Abrir site da FIAP">
-            <img src="{{ '/assets/images/sponsors/fiap.png' | relative_url }}" alt="Logo FIAP">
-          </a>
-          <a class="past-sponsor-card" href="https://lesis.lat" target="_blank" rel="noopener noreferrer" aria-label="Abrir site da LESIS">
-            <img src="{{ '/assets/images/sponsors/lesis.png' | relative_url }}" alt="Logo LESIS">
-          </a>
+          {% for sponsor in wall_sponsors %}
+            <a class="past-sponsor-card" href="{{ sponsor.url | relative_url }}" aria-label="Ver {{ sponsor.name }}">
+              <img src="{{ sponsor.logo | replace: ' ', '%20' | relative_url }}" alt="Logo {{ sponsor.name }}">
+            </a>
+          {% endfor %}
         </div>
         <div class="past-sponsors-group" aria-hidden="true">
-          <a class="past-sponsor-card" href="https://www.bugpay.com.br" target="_blank" rel="noopener noreferrer" tabindex="-1" aria-label="Abrir site da BugPay">
-            <img src="{{ '/assets/images/sponsors/bugpay-logo.png' | relative_url }}" alt="">
-          </a>
-          <a class="past-sponsor-card" href="https://bughunt.com.br" target="_blank" rel="noopener noreferrer" tabindex="-1" aria-label="Abrir site da BugHunt">
-            <img src="{{ '/assets/images/sponsors/bughunt.png' | relative_url }}" alt="">
-          </a>
-          <a class="past-sponsor-card" href="https://www.qvsaude.com.br" target="_blank" rel="noopener noreferrer" tabindex="-1" aria-label="Abrir site da QV Saude">
-            <img src="{{ '/assets/images/sponsors/qv-saude.png' | relative_url }}" alt="">
-          </a>
-          <a class="past-sponsor-card" href="https://vantico.com.br" target="_blank" rel="noopener noreferrer" tabindex="-1" aria-label="Abrir site da Vantico">
-            <img src="{{ '/assets/images/sponsors/vantico-new-logo.jpg' | relative_url }}" alt="">
-          </a>
-          <a class="past-sponsor-card" href="https://ops.team/en/" target="_blank" rel="noopener noreferrer" tabindex="-1" aria-label="Abrir site da OPS Team">
-            <img src="{{ '/assets/images/sponsors/ops-team.svg' | relative_url }}" alt="">
-          </a>
-          <a class="past-sponsor-card" href="https://42.rio" target="_blank" rel="noopener noreferrer" tabindex="-1" aria-label="Abrir site da 42 Rio">
-            <img src="{{ '/assets/images/sponsors/42-rio.webp' | relative_url }}" alt="">
-          </a>
-          <a class="past-sponsor-card" href="https://impulso.team/pt" target="_blank" rel="noopener noreferrer" tabindex="-1" aria-label="Abrir site da Impulso">
-            <img src="{{ '/assets/images/sponsors/impulso.svg' | relative_url }}" alt="">
-          </a>
-          <a class="past-sponsor-card" href="https://www.fiap.com.br/" target="_blank" rel="noopener noreferrer" tabindex="-1" aria-label="Abrir site da FIAP">
-            <img src="{{ '/assets/images/sponsors/fiap.png' | relative_url }}" alt="">
-          </a>
-          <a class="past-sponsor-card" href="https://lesis.lat" target="_blank" rel="noopener noreferrer" tabindex="-1" aria-label="Abrir site da LESIS">
-            <img src="{{ '/assets/images/sponsors/lesis.png' | relative_url }}" alt="">
-          </a>
+          {% for sponsor in wall_sponsors %}
+            <a class="past-sponsor-card" href="{{ sponsor.url | relative_url }}" tabindex="-1" aria-label="Ver {{ sponsor.name }}">
+              <img src="{{ sponsor.logo | replace: ' ', '%20' | relative_url }}" alt="">
+            </a>
+          {% endfor %}
         </div>
       </div>
     </div>
@@ -242,19 +199,21 @@ title: Hack in Brasil — Comunidade de Segurança da Informação
             <td data-label="Patrocinador">2</td>
           </tr>
           <tr>
-            <td data-label="Data">xx/08/2026</td>
-            <td data-label="Local"></td>
+            <td data-label="Data">03/09/2026</td>
+            <td data-label="Local">FIAP</td>
             <td data-label="Palestrantes"></td>
             <td data-label="Participantes"></td>
-            <td data-label="Página do Meetup">N/A</td>
-            <td data-label="Patrocinador"></td>
+            <td data-label="Página do Meetup">
+              <a href="{{ '/meetup-03-09-2026/' | relative_url }}">Detalhes</a>
+            </td>
+            <td data-label="Patrocinador">1</td>
           </tr>
         </tbody>
       </table>
     </div>
   </section>
 
-  {% assign past_speakers = site.static_files | where_exp: "file", "file.path contains '/assets/images/past speakers/'" | sort: "path" %}
+  {% assign past_speakers = site.speakers | where_exp: "s", "s.photo" | sort: "name" %}
   <section class="past-speakers" aria-labelledby="past-speakers-title">
     <div class="past-speakers-header">
       <h2 class="past-speakers-title" id="past-speakers-title">Palestrantes de edições anteriores</h2>
@@ -264,20 +223,18 @@ title: Hack in Brasil — Comunidade de Segurança da Informação
       <div class="past-speakers-track">
         <div class="past-speakers-group">
           {% for speaker in past_speakers %}
-            {% assign speaker_name = speaker.name | remove: '.jpg' | remove: '.jpeg' | remove: '.png' | remove: '.webp' | remove: '_jpg' | replace: '_', ' ' %}
-            <article class="past-speaker-card">
-              <img src="{{ speaker.path | replace: ' ', '%20' | relative_url }}" alt="Foto de {{ speaker_name }}">
-              <h3>{{ speaker_name }}</h3>
-            </article>
+            <a class="past-speaker-card" href="{{ speaker.url | relative_url }}">
+              <img src="{{ speaker.photo | replace: ' ', '%20' | relative_url }}" alt="Foto de {{ speaker.name }}">
+              <h3>{{ speaker.name }}</h3>
+            </a>
           {% endfor %}
         </div>
         <div class="past-speakers-group" aria-hidden="true">
           {% for speaker in past_speakers %}
-            {% assign speaker_name = speaker.name | remove: '.jpg' | remove: '.jpeg' | remove: '.png' | remove: '.webp' | remove: '_jpg' | replace: '_', ' ' %}
-            <article class="past-speaker-card">
-              <img src="{{ speaker.path | replace: ' ', '%20' | relative_url }}" alt="">
-              <h3>{{ speaker_name }}</h3>
-            </article>
+            <a class="past-speaker-card" href="{{ speaker.url | relative_url }}" tabindex="-1">
+              <img src="{{ speaker.photo | replace: ' ', '%20' | relative_url }}" alt="">
+              <h3>{{ speaker.name }}</h3>
+            </a>
           {% endfor %}
         </div>
       </div>
@@ -289,19 +246,13 @@ title: Hack in Brasil — Comunidade de Segurança da Informação
       <h2 class="community-supporters-title" id="community-supporters-title">Quem apoiou a comunidade</h2>
       <p class="community-supporters-subtitle">Parceiros que fortaleceram nossos encontros</p>
     </div>
+    {% assign supporters = site.supporters | sort: "order" %}
     <div class="community-supporters-grid">
-      <a class="community-supporter-card" href="https://arcahub.com.br" target="_blank" rel="noopener noreferrer" aria-label="Abrir site da ArcaHub">
-        <img src="{{ '/assets/images/sponsors/arcahub.png' | relative_url }}" alt="Logo ArcaHub">
-      </a>
-      <a class="community-supporter-card" href="https://hackingnawebday.squarespace.com" target="_blank" rel="noopener noreferrer" aria-label="Abrir site da Hacking na Web Day">
-        <img src="{{ '/assets/images/sponsors/hacking-na-web-day-banner.png' | relative_url }}" alt="Logo Hacking na Web Day">
-      </a>
-      <a class="community-supporter-card" href="https://bsidesrj.com.br" target="_blank" rel="noopener noreferrer" aria-label="Abrir site da BSidesRJ">
-        <img src="{{ '/assets/images/sponsors/bsides-rj.png' | relative_url }}" alt="Logo BSidesRJ">
-      </a>
-      <a class="community-supporter-card" href="https://avatars.githubusercontent.com/u/248527067?v=4" target="_blank" rel="noopener noreferrer" aria-label="Abrir logo da comunidade parceira">
-        <img src="{{ '/assets/images/sponsors/hacking-na-web-day.png' | relative_url }}" alt="Logo comunidade parceira">
-      </a>
+      {% for supporter in supporters %}
+        <a class="community-supporter-card" href="{{ supporter.url | relative_url }}" aria-label="Ver {{ supporter.name }}">
+          <img src="{{ supporter.logo | replace: ' ', '%20' | relative_url }}" alt="Logo {{ supporter.name }}">
+        </a>
+      {% endfor %}
     </div>
   </section>
 

@@ -14,6 +14,24 @@
 
   const apiBase = (form.dataset.apiBase || "").trim().replace(/\/$/, "");
   const meetupSlug = (form.dataset.meetupSlug || "").trim();
+  const meetupDate = (form.dataset.meetupDate || "").trim();
+
+  // Hide the registration section once the meetup date has passed.
+  // An empty/invalid date means the meetup is still upcoming, so we keep showing it.
+  function isMeetupPast() {
+    if (!meetupDate) return false;
+    const endOfMeetupDay = new Date(`${meetupDate}T23:59:59`);
+    if (Number.isNaN(endOfMeetupDay.getTime())) return false;
+    return Date.now() > endOfMeetupDay.getTime();
+  }
+
+  if (isMeetupPast()) {
+    const section = form.closest(".meetup-card");
+    if (section) section.hidden = true;
+    const kicker = document.querySelector(".hero-kicker");
+    if (kicker) kicker.textContent = "Edição anterior";
+    return;
+  }
 
   function setFeedback(message, type) {
     feedbackTitle.textContent = type === "success" ? "Inscrição confirmada" : "Não foi possível concluir";

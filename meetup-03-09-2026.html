@@ -1,7 +1,7 @@
 ---
 layout: default
-title: Meetup Hack in Brasil | xx/08/2026
-permalink: /meetup-xx-08-2026/
+title: Meetup Hack in Brasil | 03/09/2026
+permalink: /meetup-03-09-2026/
 ---
 <header class="nav">
   <div class="nav-left">
@@ -19,7 +19,7 @@ permalink: /meetup-xx-08-2026/
 <main class="meetup-page">
   <section class="meetup-card">
     <p class="hero-kicker">Próximo encontro</p>
-    <h1 class="meetup-title">Meetup de Cibersegurança - xx/08/2026</h1>
+    <h1 class="meetup-title">Meetup de Cibersegurança - 03/09/2026</h1>
     <p class="meetup-subtitle">
       Encontro da comunidade para compartilhar experiências e conhecimento em segurança da informação.
     </p>
@@ -43,7 +43,7 @@ permalink: /meetup-xx-08-2026/
     <p class="meetup-subtitle" id="registration-status">
       Carregando disponibilidade...
     </p>
-    <form id="meetup-registration-form" class="registration-form" data-api-base="https://hackinbrasil-meetup-api.hi-c21.workers.dev" data-meetup-slug="meetup-xx-08-2026">
+    <form id="meetup-registration-form" class="registration-form" data-api-base="https://hackinbrasil-meetup-api.hi-c21.workers.dev" data-meetup-slug="meetup-03-09-2026" data-meetup-date="2026-09-03">
       <div class="registration-field">
         <label for="reg-name">Nome completo</label>
         <input id="reg-name" class="registration-input" type="text" name="name" placeholder="Ex.: Bruno Almeida" required>
@@ -79,13 +79,28 @@ permalink: /meetup-xx-08-2026/
   <section class="meetup-card">
     <h2>Patrocínio</h2>
     <div class="sponsor-list">
-      <!-- Patrocinadores a confirmar -->
+      <a class="sponsor-card sponsor-link" href="https://www.fiap.com.br/" target="_blank" rel="noopener noreferrer" aria-label="Abrir site da FIAP">
+        <img src="{{ '/assets/images/sponsors/fiap.png' | relative_url }}" alt="Logo FIAP">
+      </a>
     </div>
   </section>
 
   <section class="meetup-card">
     <h2>Local do Meetup</h2>
-    <p><strong>Endereço completo:</strong> a confirmar</p>
+    <p><strong>Endereço completo:</strong> FIAP — Rua Marques de Olinda, 11</p>
+    <p>
+      <a class="meetup-map-link" href="https://maps.google.com/?q=FIAP+Rio+de+Janeiro" target="_blank" rel="noopener noreferrer">
+        Abrir no Google Maps
+      </a>
+    </p>
+    <div class="meetup-map">
+      <iframe
+        title="Mapa do local do meetup"
+        src="https://maps.google.com/maps?q=FIAP%20Rio%20de%20Janeiro&t=&z=15&ie=UTF8&iwloc=&output=embed"
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade">
+      </iframe>
+    </div>
   </section>
 </main>
 

@@ -7,6 +7,15 @@ collections:
   blog:
     output: true
     permalink: /blog/:name/
+  sponsors:
+    output: true
+    permalink: /patrocinadores/:name/
+  speakers:
+    output: true
+    permalink: /palestrantes/:name/
+  supporters:
+    output: true
+    permalink: /apoiadores/:name/
 plugins: []
 exclude:
   - README.md

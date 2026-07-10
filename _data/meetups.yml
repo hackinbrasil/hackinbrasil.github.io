@@ -1,0 +1,15 @@
+# Lookup table used to render relations between the dedicated pages
+# (sponsors / speakers / supporters) and the meetups they took part in.
+# Add an entry here whenever a meetup gets its own page.
+- slug: meetup-25-03-2026
+  title: "Meetup Hack in Brasil — 25/03/2026"
+  local: "FIAP"
+  url: /meetup-25-03-2026/
+- slug: meetup-25-04-2026
+  title: "Meetup Hack in Brasil — 25/04/2026"
+  local: "Colégio Niterói"
+  url: /meetup-25-04-2026/
+- slug: meetup-03-09-2026
+  title: "Meetup Hack in Brasil — 03/09/2026"
+  local: "FIAP"
+  url: /meetup-03-09-2026/

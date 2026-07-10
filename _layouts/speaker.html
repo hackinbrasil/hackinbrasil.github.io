@@ -1,0 +1,62 @@
+---
+layout: default
+---
+<header class="nav">
+  <div class="nav-left">
+    <a class="nav-brand" href="{{ '/' | relative_url }}">
+      <img class="nav-logo" src="{{ '/assets/images/hackinbrasil.png' | relative_url }}" alt="Logo Hack in Brasil">
+      <span>Hack in Brasil</span>
+    </a>
+    <span class="nav-logo-tag">Palestrante</span>
+  </div>
+  <nav class="nav-right nav-right-static">
+    <a class="nav-link" href="{{ '/' | relative_url }}">Voltar para início</a>
+  </nav>
+</header>
+
+<main class="meetup-page">
+  <section class="meetup-card">
+    {% if page.photo %}
+      <img class="speaker-detail-photo" src="{{ page.photo | replace: ' ', '%20' | relative_url }}" alt="Foto de {{ page.name }}">
+    {% endif %}
+    <p class="hero-kicker">Palestrante</p>
+    <h1 class="meetup-title">{{ page.name }}</h1>
+    {% if page.role %}<p class="speaker-role">{{ page.role }}</p>{% endif %}
+    {% assign body = content | strip %}
+    {% if body != "" %}
+      <div class="blog-article-content">{{ content }}</div>
+    {% else %}
+      <p class="meetup-subtitle">Biografia em breve.</p>
+    {% endif %}
+  </section>
+
+  {% if page.talks and page.talks != empty %}
+    <section class="meetup-card">
+      <h2>Palestras</h2>
+      <div class="talks-grid">
+        {% for talk in page.talks %}
+          <article class="talk-card">
+            <h3>{{ talk.title }}</h3>
+            {% if talk.description %}<p>{{ talk.description }}</p>{% endif %}
+            {% assign m = site.data.meetups | where: "slug", talk.meetup | first %}
+            {% if m %}<p class="talk-time"><a href="{{ m.url | relative_url }}">{{ m.title }}</a></p>{% endif %}
+          </article>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
+  {% if page.meetups and page.meetups != empty %}
+    <section class="meetup-card">
+      <h2>Participação em meetups</h2>
+      <ul class="entity-meetup-list">
+        {% for slug in page.meetups %}
+          {% assign m = site.data.meetups | where: "slug", slug | first %}
+          {% if m %}
+            <li><a href="{{ m.url | relative_url }}">{{ m.title }}</a></li>
+          {% endif %}
+        {% endfor %}
+      </ul>
+    </section>
+  {% endif %}
+</main>
