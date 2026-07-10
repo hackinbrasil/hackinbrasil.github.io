@@ -36,7 +36,7 @@ This project keeps a static Jekyll frontend and uses Cloudflare Workers + D1 for
 - `meetup_slug` (FK)
 - `name`
 - `email`
-- `phone` (E.164, e.g. `+5511912345678`; added in migration `0005`)
+- `phone_encrypted` (E.164, e.g. `+5511912345678`, AES-GCM encrypted like the CPF; column added in `0005`, encrypted in `0007`)
 - `document_encrypted`
 - `document_last4`
 - `consent_lgpd`

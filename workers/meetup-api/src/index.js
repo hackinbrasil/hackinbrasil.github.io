@@ -129,10 +129,10 @@ async function importAesKey(env) {
   return crypto.subtle.importKey("raw", raw, "AES-GCM", false, ["encrypt", "decrypt"]);
 }
 
-async function encryptDocument(document, env) {
+async function encryptField(value, env) {
   const key = await importAesKey(env);
   const iv = crypto.getRandomValues(new Uint8Array(12));
-  const plain = new TextEncoder().encode(document);
+  const plain = new TextEncoder().encode(value);
   const cipher = await crypto.subtle.encrypt({name: "AES-GCM", iv}, key, plain);
   const payload = new Uint8Array(iv.length + cipher.byteLength);
   payload.set(iv, 0);
@@ -140,7 +140,7 @@ async function encryptDocument(document, env) {
   return bytesToBase64(payload);
 }
 
-async function decryptDocument(encryptedPayload, env) {
+async function decryptField(encryptedPayload, env) {
   const key = await importAesKey(env);
   const payload = base64ToBytes(encryptedPayload);
   if (payload.byteLength <= 12) {
@@ -363,7 +363,8 @@ async function handleRegister(request, env, slug, corsOrigin) {
     return json({error: "Inscrições encerradas para este meetup"}, 409, corsOrigin);
   }
 
-  const encryptedDocument = await encryptDocument(document, env);
+  const encryptedDocument = await encryptField(document, env);
+  const encryptedPhone = await encryptField(phone, env);
   const documentLast4 = document.slice(-4);
 
   const gate = await env.DB
@@ -382,9 +383,9 @@ async function handleRegister(request, env, slug, corsOrigin) {
   try {
     const inserted = await env.DB
       .prepare(
-        "INSERT INTO registrations (meetup_slug, name, email, phone, document_encrypted, document_last4, consent_lgpd) VALUES (?, ?, ?, ?, ?, ?, 1)"
+        "INSERT INTO registrations (meetup_slug, name, email, phone_encrypted, document_encrypted, document_last4, consent_lgpd) VALUES (?, ?, ?, ?, ?, ?, 1)"
       )
-      .bind(slug, name, email, phone, encryptedDocument, documentLast4)
+      .bind(slug, name, email, encryptedPhone, encryptedDocument, documentLast4)
       .run();
 
     registrationId = Number(inserted.meta?.last_row_id || 0);
@@ -402,7 +403,7 @@ async function handleRegister(request, env, slug, corsOrigin) {
       try {
         const existingRegistration = await getRegistrationByMeetupAndEmail(env.DB, slug, email);
         if (existingRegistration) {
-          const existingDocument = await decryptDocument(
+          const existingDocument = await decryptField(
             String(existingRegistration.document_encrypted),
             env
           );
