@@ -12,7 +12,7 @@
   const phoneInput = document.getElementById("reg-phone");
   const phoneHelp = document.getElementById("phone-help");
 
-  if (!form || !status || !submit || !feedbackModal || !feedbackTitle || !feedbackMessage || !cpfInput || !cpfHelp) return;
+  if (!form || !status || !submit || !feedbackModal || !feedbackTitle || !feedbackMessage) return;
 
   const apiBase = (form.dataset.apiBase || "").trim().replace(/\/$/, "");
   const meetupSlug = (form.dataset.meetupSlug || "").trim();
@@ -76,6 +76,27 @@
     return;
   }
 
+  // Every field the registration flow depends on must be present in the form before we let
+  // anyone submit. The API now requires all of them (phone included), so a page cloned
+  // without one would otherwise submit incomplete data and be rejected with a confusing
+  // error the user can't fix — fail loudly here instead of silently.
+  const requiredControls = {
+    "nome": form.querySelector('[name="name"]'),
+    "e-mail": form.querySelector('[name="email"]'),
+    "celular": phoneInput,
+    "documento": cpfInput,
+    "verificação": captchaInput,
+    "pergunta de verificação": captchaQuestion,
+    "consentimento LGPD": form.querySelector('[name="consentLgpd"]')
+  };
+  const missingControls = Object.keys(requiredControls).filter((label) => !requiredControls[label]);
+  if (missingControls.length > 0) {
+    status.textContent = "Formulário de inscrição incompleto. Contate a organização.";
+    submit.disabled = true;
+    setFeedback(`Formulário indisponível: campo(s) ausente(s) — ${missingControls.join(", ")}.`, "error");
+    return;
+  }
+
   const statusUrl = `${apiBase}/api/meetups/${meetupSlug}/status`;
   const registerUrl = `${apiBase}/api/meetups/${meetupSlug}/register`;
 
@@ -111,10 +132,12 @@
 
   function setCpfErrorState(isInvalid) {
     cpfInput.classList.toggle("is-invalid", isInvalid);
-    cpfHelp.classList.toggle("is-error", isInvalid);
-    cpfHelp.textContent = isInvalid
-      ? "CPF inválido. Verifique os dígitos e tente novamente."
-      : "Apenas CPF válido será aceito.";
+    if (cpfHelp) {
+      cpfHelp.classList.toggle("is-error", isInvalid);
+      cpfHelp.textContent = isInvalid
+        ? "CPF inválido. Verifique os dígitos e tente novamente."
+        : "Apenas CPF válido será aceito.";
+    }
   }
 
   cpfInput.addEventListener("input", function () {
@@ -248,14 +271,12 @@
 
     setCpfErrorState(false);
 
-    if (phoneInput) {
-      if (!isValidBrazilPhone(phoneInput.value)) {
-        setPhoneErrorState(true);
-        setFeedback("Número de celular inválido. Use DDD + número, ex.: (11) 912345678.", "error");
-        return;
-      }
-      setPhoneErrorState(false);
+    if (!isValidBrazilPhone(phoneInput.value)) {
+      setPhoneErrorState(true);
+      setFeedback("Número de celular inválido. Use DDD + número, ex.: (11) 912345678.", "error");
+      return;
     }
+    setPhoneErrorState(false);
 
     if (!isCaptchaValid()) {
       setFeedback("Resposta da verificação incorreta. Resolva a nova operação e tente novamente.", "error");
@@ -264,9 +285,7 @@
     }
 
     payload.document = onlyDigits(payload.document);
-    if (phoneInput) {
-      payload.phone = `+55${normalizePhone(phoneInput.value)}`;
-    }
+    payload.phone = `+55${normalizePhone(phoneInput.value)}`;
 
     submit.disabled = true;
     submit.textContent = "Enviando...";
