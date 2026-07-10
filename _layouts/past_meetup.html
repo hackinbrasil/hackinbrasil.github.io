@@ -1,0 +1,98 @@
+---
+layout: default
+---
+<header class="nav">
+  <div class="nav-left">
+    <a class="nav-brand" href="{{ '/' | relative_url }}">
+      <img class="nav-logo" src="{{ '/assets/images/hackinbrasil.png' | relative_url }}" alt="Logo Hack in Brasil">
+      <span>Hack in Brasil</span>
+    </a>
+    <span class="nav-logo-tag">Meetup</span>
+  </div>
+  <nav class="nav-right nav-right-static">
+    <a class="nav-link" href="{{ '/' | relative_url }}">Voltar para início</a>
+  </nav>
+</header>
+
+<main class="meetup-page">
+  <section class="meetup-card">
+    <p class="hero-kicker">Edição anterior</p>
+    <h1 class="meetup-title">Meetup de Cibersegurança - {{ page.date_display }}</h1>
+    <p class="meetup-subtitle">
+      Encontro da comunidade Hack in Brasil no {{ page.local }}.
+    </p>
+    <p class="speaker-role">
+      {% if page.participants %}{{ page.participants }} participantes{% endif %}
+      {% if page.speakers_count %} · {{ page.speakers_count }} palestrantes{% endif %}
+      {% if page.sponsors_count %} · {{ page.sponsors_count }} patrocinadores{% endif %}
+    </p>
+  </section>
+
+  {% if page.speakers_count %}
+  <section class="meetup-card">
+    <h2>Agenda e Palestrantes</h2>
+    <p class="meetup-subtitle">Palestras desta edição — detalhes a confirmar.</p>
+    <div class="talks-grid">
+      {% for i in (1..page.speakers_count) %}
+      <article class="talk-card">
+        <p class="talk-time">--:--</p>
+        <div class="talk-layout">
+          <div class="talk-content">
+            <h3>Palestra {{ i }} — a confirmar</h3>
+            <p>Título e descrição da palestra a confirmar.</p>
+          </div>
+          <aside class="talk-speaker">
+            <h4>Palestrante a confirmar</h4>
+            <p class="speaker-role">Cargo a confirmar</p>
+          </aside>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <section class="meetup-card">
+    <h2>Patrocínio</h2>
+    <p class="meetup-subtitle">
+      {% if page.sponsors_count %}{{ page.sponsors_count }} patrocinadores apoiaram esta edição — a confirmar quais.{% else %}Patrocinadores a confirmar.{% endif %}
+    </p>
+    <div class="sponsor-list">
+      <!-- Adicione aqui os cartões de patrocínio desta edição quando confirmados. -->
+    </div>
+  </section>
+
+  <section class="meetup-card">
+    <h2>Local do Meetup</h2>
+    <p><strong>Local:</strong> {{ page.local }}</p>
+    <p>Endereço completo a confirmar.</p>
+  </section>
+
+  {% assign edition_speakers = site.speakers | where_exp: "s", "s.meetups contains page.meetup_slug" | sort: "name" %}
+  {% if edition_speakers != empty %}
+  <section class="meetup-card">
+    <h2>Palestrantes desta edição</h2>
+    <div class="edition-speakers">
+      {% for speaker in edition_speakers %}
+        <a class="past-speaker-card" href="{{ speaker.url | relative_url }}">
+          {% if speaker.photo %}<img src="{{ speaker.photo | replace: ' ', '%20' | relative_url }}" alt="Foto de {{ speaker.name }}">{% endif %}
+          <h3>{{ speaker.name }}</h3>
+        </a>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <section class="meetup-card">
+    <h2>Fotos e vídeos</h2>
+    <p class="meetup-subtitle">Registros deste encontro.</p>
+    <div class="meetup-gallery">
+      <!--
+        Adicione as fotos e vídeos deste meetup aqui, por exemplo:
+        <img src="{{ '/assets/images/meetups/' | append: page.meetup_slug | relative_url }}/foto-1.jpg" alt="{{ page.date_display }}" loading="lazy">
+        <iframe src="https://www.youtube.com/embed/VIDEO_ID" title="Vídeo do meetup" loading="lazy" allowfullscreen></iframe>
+      -->
+      <p class="meetup-gallery-empty">Fotos e vídeos em breve.</p>
+    </div>
+  </section>
+</main>

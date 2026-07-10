@@ -1,6 +1,34 @@
 # Lookup table used to render relations between the dedicated pages
 # (sponsors / speakers / supporters) and the meetups they took part in.
 # Add an entry here whenever a meetup gets its own page.
+- slug: meetup-13-12-2023
+  title: "Meetup Hack in Brasil — 13/12/2023"
+  local: "Impulso"
+  url: /meetup-13-12-2023/
+- slug: meetup-31-05-2024
+  title: "Meetup Hack in Brasil — 31/05/2024"
+  local: "Universidade Veiga de Almeida"
+  url: /meetup-31-05-2024/
+- slug: meetup-25-07-2024
+  title: "Meetup Hack in Brasil — 25/07/2024"
+  local: "Impulso"
+  url: /meetup-25-07-2024/
+- slug: meetup-26-09-2024
+  title: "Meetup Hack in Brasil — 26/09/2024"
+  local: "Stone Pagamentos"
+  url: /meetup-26-09-2024/
+- slug: meetup-15-05-2025
+  title: "Meetup Hack in Brasil — 15/05/2025"
+  local: "WeWork"
+  url: /meetup-15-05-2025/
+- slug: meetup-25-09-2025
+  title: "Meetup Hack in Brasil — 25/09/2025"
+  local: "ArcaHub"
+  url: /meetup-25-09-2025/
+- slug: meetup-18-12-2025
+  title: "Meetup Hack in Brasil — 18/12/2025"
+  local: "42 Rio"
+  url: /meetup-18-12-2025/
 - slug: meetup-25-03-2026
   title: "Meetup Hack in Brasil — 25/03/2026"
   local: "FIAP"
