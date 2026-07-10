@@ -47,11 +47,12 @@
     const whatsappInviteUrl = "https://chat.whatsapp.com/D4vKksmiQ53JpVMih0PF4b?mode=hq2tcli";
     const whatsappInviteLink = document.createElement("a");
 
-    feedbackTitle.textContent = "Inscrição confirmada";
+    feedbackTitle.textContent = "Inscrição confirmada! 🎉";
     feedbackMessage.textContent = "";
-    feedbackMessage.append("Inscrição confirmada com sucesso.");
+    feedbackMessage.append("Sua vaga está garantida. Nos vemos no meetup!");
     feedbackMessage.append(document.createElement("br"));
-    feedbackMessage.append("Participe também do nosso ");
+    feedbackMessage.append(document.createElement("br"));
+    feedbackMessage.append("Entre no nosso grupo do WhatsApp para receber os avisos e novidades do evento:");
 
     whatsappInviteLink.href = whatsappInviteUrl;
     whatsappInviteLink.target = "_blank";
