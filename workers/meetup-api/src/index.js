@@ -329,6 +329,9 @@ async function handleRegister(request, env, slug, corsOrigin) {
   const phoneNational = normalizePhone(body.phone);
   const phone = `+55${phoneNational}`;
   const consentLgpd = body.consentLgpd === true;
+  const captchaProvided =
+    body.captcha !== undefined && body.captcha !== null && String(body.captcha).trim() !== "";
+  const captchaValue = Number(body.captcha);
 
   if (!name || name.length < 3) {
     return json({error: "Nome inválido"}, 400, corsOrigin);
@@ -341,6 +344,12 @@ async function handleRegister(request, env, slug, corsOrigin) {
   }
   if (!isValidBrazilMobile(phoneNational)) {
     return json({error: "Número de celular inválido"}, 400, corsOrigin);
+  }
+  if (!captchaProvided) {
+    return json({error: "Verificação obrigatória"}, 400, corsOrigin);
+  }
+  if (!Number.isFinite(captchaValue) || captchaValue < 0) {
+    return json({error: "Verificação inválida"}, 400, corsOrigin);
   }
   if (!consentLgpd) {
     return json({error: "Consentimento LGPD é obrigatório"}, 400, corsOrigin);

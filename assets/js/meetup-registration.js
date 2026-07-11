@@ -286,6 +286,7 @@
 
     payload.document = onlyDigits(payload.document);
     payload.phone = `+55${normalizePhone(phoneInput.value)}`;
+    payload.captcha = Number(captchaInput.value);
 
     submit.disabled = true;
     submit.textContent = "Enviando...";
