@@ -8,3 +8,5 @@ order: 1
 wall: true
 meetups: []
 ---
+
+A BugPay é especializada em segurança ofensiva contínua contra ameaças cibernéticas, oferecendo proteção proativa para identificar e neutralizar vulnerabilidades antes que sejam exploradas por atores maliciosos.

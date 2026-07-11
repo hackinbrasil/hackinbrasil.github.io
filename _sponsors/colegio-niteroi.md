@@ -9,3 +9,5 @@ wall: false
 meetups:
   - meetup-25-04-2026
 ---
+
+O Colégio Niterói é uma tradicional instituição de ensino da zona norte de Niterói (RJ), em atividade desde 1994, dedicada à formação de estudantes da Educação Infantil ao Ensino Médio com foco em educação de qualidade e formação cidadã.
