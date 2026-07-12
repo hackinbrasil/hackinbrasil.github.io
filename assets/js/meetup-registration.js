@@ -13,10 +13,18 @@
   const phoneHelp = document.getElementById("phone-help");
 
   if (!form || !status || !submit || !feedbackModal || !feedbackTitle || !feedbackMessage) return;
+  if (!window.HIBForms) return;
 
+  const F = window.HIBForms;
   const apiBase = (form.dataset.apiBase || "").trim().replace(/\/$/, "");
   const meetupSlug = (form.dataset.meetupSlug || "").trim();
   const meetupDate = (form.dataset.meetupDate || "").trim();
+
+  const feedback = F.createFeedback(feedbackModal, feedbackTitle, feedbackMessage, {
+    success: "Inscrição confirmada",
+    error: "Não foi possível concluir"
+  });
+  const captcha = F.createCaptcha(captchaQuestion, captchaInput, apiBase);
 
   // Hide the registration section once the meetup date has passed.
   // An empty/invalid date means the meetup is still upcoming, so we keep showing it.
@@ -33,14 +41,6 @@
     const kicker = document.querySelector(".hero-kicker");
     if (kicker) kicker.textContent = "Edição anterior";
     return;
-  }
-
-  function setFeedback(message, type) {
-    feedbackTitle.textContent = type === "success" ? "Inscrição confirmada" : "Não foi possível concluir";
-    feedbackMessage.textContent = message;
-    feedbackModal.classList.remove("is-success", "is-error");
-    feedbackModal.classList.add(type === "success" ? "is-success" : "is-error");
-    feedbackModal.classList.add("open");
   }
 
   function setSuccessFeedbackWithWhatsappInvite() {
@@ -72,7 +72,7 @@
   if (!apiBase || apiBase.includes("REPLACE-WITH-YOUR-WORKER-DOMAIN")) {
     status.textContent = "Configuração pendente: defina o domínio da API no formulário.";
     submit.disabled = true;
-    setFeedback("Não foi possível iniciar as inscrições.", "error");
+    feedback.show("Não foi possível iniciar as inscrições.", "error");
     return;
   }
 
@@ -93,42 +93,12 @@
   if (missingControls.length > 0) {
     status.textContent = "Formulário de inscrição incompleto. Contate a organização.";
     submit.disabled = true;
-    setFeedback(`Formulário indisponível: campo(s) ausente(s) — ${missingControls.join(", ")}.`, "error");
+    feedback.show(`Formulário indisponível: campo(s) ausente(s) — ${missingControls.join(", ")}.`, "error");
     return;
   }
 
   const statusUrl = `${apiBase}/api/meetups/${meetupSlug}/status`;
   const registerUrl = `${apiBase}/api/meetups/${meetupSlug}/register`;
-
-  function onlyDigits(value) {
-    return String(value || "").replace(/\D+/g, "");
-  }
-
-  function formatCpf(value) {
-    const digits = onlyDigits(value).slice(0, 11);
-    return digits
-      .replace(/^(\d{3})(\d)/, "$1.$2")
-      .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
-      .replace(/\.(\d{3})(\d)/, ".$1-$2");
-  }
-
-  function isValidCpf(value) {
-    const cpf = onlyDigits(value);
-    if (cpf.length !== 11) return false;
-    if (/^(\d)\1+$/.test(cpf)) return false;
-
-    let sum = 0;
-    for (let i = 0; i < 9; i += 1) sum += Number(cpf[i]) * (10 - i);
-    let firstDigit = (sum * 10) % 11;
-    if (firstDigit === 10) firstDigit = 0;
-    if (firstDigit !== Number(cpf[9])) return false;
-
-    sum = 0;
-    for (let i = 0; i < 10; i += 1) sum += Number(cpf[i]) * (11 - i);
-    let secondDigit = (sum * 10) % 11;
-    if (secondDigit === 10) secondDigit = 0;
-    return secondDigit === Number(cpf[10]);
-  }
 
   function setCpfErrorState(isInvalid) {
     cpfInput.classList.toggle("is-invalid", isInvalid);
@@ -141,32 +111,13 @@
   }
 
   cpfInput.addEventListener("input", function () {
-    cpfInput.value = formatCpf(cpfInput.value);
+    cpfInput.value = F.formatCpf(cpfInput.value);
     if (cpfInput.value.length < 14) {
       setCpfErrorState(false);
       return;
     }
-    setCpfErrorState(!isValidCpf(cpfInput.value));
+    setCpfErrorState(!F.isValidCpf(cpfInput.value));
   });
-
-  // Brazilian mobile phone: national number is DDD (2 digits) + 9 + 8 digits.
-  // Country code +55 is fixed and added on submit. Presented as "(11) 912345678".
-  function normalizePhone(value) {
-    let digits = onlyDigits(value);
-    if (digits.length === 13 && digits.startsWith("55")) digits = digits.slice(2);
-    return digits.slice(0, 11);
-  }
-
-  function formatPhone(value) {
-    const digits = normalizePhone(value);
-    if (digits.length === 0) return "";
-    if (digits.length <= 2) return `(${digits}`;
-    return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
-  }
-
-  function isValidBrazilPhone(value) {
-    return /^[1-9][1-9]9\d{8}$/.test(normalizePhone(value));
-  }
 
   function setPhoneErrorState(isInvalid) {
     if (!phoneInput) return;
@@ -181,46 +132,20 @@
 
   if (phoneInput) {
     phoneInput.addEventListener("input", function () {
-      phoneInput.value = formatPhone(phoneInput.value);
-      if (normalizePhone(phoneInput.value).length < 11) {
+      phoneInput.value = F.formatPhone(phoneInput.value);
+      if (F.normalizePhone(phoneInput.value).length < 11) {
         setPhoneErrorState(false);
         return;
       }
-      setPhoneErrorState(!isValidBrazilPhone(phoneInput.value));
+      setPhoneErrorState(!F.isBrazilMobile(phoneInput.value));
     });
-  }
-
-  let captchaAnswer = null;
-
-  function renderCaptcha() {
-    if (!captchaQuestion) return;
-    const a = Math.floor(Math.random() * 9) + 1;
-    const b = Math.floor(Math.random() * 9) + 1;
-    const isAddition = Math.random() < 0.5;
-    let left = a;
-    let right = b;
-    if (!isAddition && left < right) {
-      const temp = left;
-      left = right;
-      right = temp;
-    }
-    captchaAnswer = isAddition ? left + right : left - right;
-    captchaQuestion.textContent = `${left} ${isAddition ? "+" : "−"} ${right}`;
-    if (captchaInput) captchaInput.value = "";
-  }
-
-  function isCaptchaValid() {
-    if (!captchaInput || captchaAnswer === null) return true;
-    const value = captchaInput.value.trim();
-    if (value === "") return false;
-    return Number(value) === captchaAnswer;
   }
 
   function setClosedState(message) {
     status.textContent = message;
     submit.disabled = true;
     submit.textContent = "Inscrições encerradas";
-    setFeedback("Novos ingressos serão liberados em breve", "error");
+    feedback.show("Novos ingressos serão liberados em breve", "error");
   }
 
   async function refreshStatus() {
@@ -231,7 +156,7 @@
       if (!res.ok) {
         status.textContent = data.error || "Não foi possível consultar as vagas.";
         submit.disabled = true;
-        setFeedback("Falha ao carregar disponibilidade de vagas.", "error");
+        feedback.show("Falha ao carregar disponibilidade de vagas.", "error");
         return;
       }
 
@@ -246,7 +171,7 @@
     } catch {
       status.textContent = "Erro ao verificar disponibilidade. Tente novamente em instantes.";
       submit.disabled = true;
-      setFeedback("Erro de conexão ao consultar vagas.", "error");
+      feedback.show("Erro de conexão ao consultar vagas.", "error");
     }
   }
 
@@ -263,30 +188,31 @@
       consentLgpd: formData.get("consentLgpd") === "on"
     };
 
-    if (!isValidCpf(payload.document)) {
+    if (!F.isValidCpf(payload.document)) {
       setCpfErrorState(true);
-      setFeedback("CPF inválido. Revise o número informado.", "error");
+      feedback.show("CPF inválido. Revise o número informado.", "error");
       return;
     }
 
     setCpfErrorState(false);
 
-    if (!isValidBrazilPhone(phoneInput.value)) {
+    if (!F.isBrazilMobile(phoneInput.value)) {
       setPhoneErrorState(true);
-      setFeedback("Número de celular inválido. Use DDD + número, ex.: (11) 912345678.", "error");
+      feedback.show("Número de celular inválido. Use DDD + número, ex.: (11) 912345678.", "error");
       return;
     }
     setPhoneErrorState(false);
 
-    if (!isCaptchaValid()) {
-      setFeedback("Resposta da verificação incorreta. Resolva a nova operação e tente novamente.", "error");
-      renderCaptcha();
+    if (!captcha.ready()) {
+      feedback.show("Resolva a verificação antes de enviar.", "error");
+      captcha.render();
       return;
     }
 
-    payload.document = onlyDigits(payload.document);
-    payload.phone = `+55${normalizePhone(phoneInput.value)}`;
-    payload.captcha = Number(captchaInput.value);
+    payload.document = F.onlyDigits(payload.document);
+    payload.phone = `+55${F.normalizePhone(phoneInput.value)}`;
+    payload.captchaId = captcha.getToken();
+    payload.captcha = Number(captcha.getAnswer());
 
     submit.disabled = true;
     submit.textContent = "Enviando...";
@@ -302,19 +228,18 @@
 
       if (!res.ok) {
         const errorMessage = data.error || "Não foi possível concluir a inscrição.";
-        setFeedback(errorMessage, "error");
+        feedback.show(errorMessage, "error");
         if (res.status === 409) {
           const isCapacityError = /inscriç(ã|a)es encerradas/i.test(errorMessage);
           if (isCapacityError) {
             setClosedState("Inscrições encerradas para este meetup.");
             return;
           }
-          submit.disabled = false;
-          submit.textContent = "Inscrever-se";
-        } else {
-          submit.disabled = false;
-          submit.textContent = "Inscrever-se";
         }
+        // The challenge is single-use and may now be spent — fetch a fresh one.
+        captcha.render();
+        submit.disabled = false;
+        submit.textContent = "Inscrever-se";
         return;
       }
 
@@ -322,7 +247,7 @@
       form.reset();
       setCpfErrorState(false);
       setPhoneErrorState(false);
-      renderCaptcha();
+      captcha.render();
 
       if (data.isFull) {
         setClosedState("Inscrições encerradas. Limite de participantes atingido.");
@@ -330,12 +255,13 @@
         await refreshStatus();
       }
     } catch {
-      setFeedback("Erro de conexão. Tente novamente.", "error");
+      feedback.show("Erro de conexão. Tente novamente.", "error");
+      captcha.render();
       submit.disabled = false;
       submit.textContent = "Inscrever-se";
     }
   });
 
-  renderCaptcha();
+  captcha.render();
   refreshStatus();
 })();

@@ -197,6 +197,15 @@ async function queueConfirmationEmail(env, payload) {
     .run();
 }
 
+// Collapse CR/LF and other control characters so attacker-influenced values
+// (subject built from company/talk title, reply-to from the submitter's email)
+// can't smuggle line breaks into header-like fields.
+function sanitizeHeaderValue(value) {
+  return String(value == null ? "" : value)
+    .replace(/[\u0000-\u001F\u007F]+/g, " ")
+    .trim();
+}
+
 async function sendEmailWithResend(env, job) {
   if (!env.RESEND_API_KEY) {
     throw new Error("RESEND_API_KEY secret is required");
@@ -208,14 +217,14 @@ async function sendEmailWithResend(env, job) {
   const body = {
     from: env.RESEND_FROM_EMAIL,
     to: [job.recipient_email],
-    subject: job.subject,
+    subject: sanitizeHeaderValue(job.subject),
     html: job.html_body,
     text: job.text_body
   };
 
   const replyTo = job.reply_to || env.RESEND_REPLY_TO;
   if (replyTo) {
-    body.reply_to = replyTo;
+    body.reply_to = sanitizeHeaderValue(replyTo);
   }
 
   const response = await fetch("https://api.resend.com/emails", {
@@ -314,6 +323,84 @@ async function processPendingEmailJobs(env, limit = 20) {
   }
 }
 
+function randomInt(maxExclusive) {
+  const buf = new Uint32Array(1);
+  crypto.getRandomValues(buf);
+  return buf[0] % maxExclusive;
+}
+
+// Builds a small arithmetic challenge. The answer stays server-side; only the
+// question string is shown to the user.
+function generateCaptchaChallenge() {
+  const a = randomInt(9) + 1;
+  const b = randomInt(9) + 1;
+  const isAddition = randomInt(2) === 0;
+  let left = a;
+  let right = b;
+  if (!isAddition && left < right) {
+    const temp = left;
+    left = right;
+    right = temp;
+  }
+  const answer = isAddition ? left + right : left - right;
+  const question = `${left} ${isAddition ? "+" : "−"} ${right}`;
+  return {question, answer};
+}
+
+async function handleCaptchaIssue(env, corsOrigin) {
+  const {question, answer} = generateCaptchaChallenge();
+  const id = crypto.randomUUID();
+
+  try {
+    await env.DB
+      .prepare(
+        "INSERT INTO captcha_challenges (id, answer, expires_at) VALUES (?, ?, datetime('now', '+10 minutes'))"
+      )
+      .bind(id, answer)
+      .run();
+  } catch (err) {
+    const message = String(err?.message || err || "");
+    if (message.includes("no such table")) {
+      return json(
+        {error: "Database not initialized. Apply D1 migrations before using the API."},
+        500,
+        corsOrigin
+      );
+    }
+    return json({error: "Não foi possível gerar a verificação"}, 500, corsOrigin);
+  }
+
+  return json({id, question}, 200, corsOrigin);
+}
+
+// Verifies and consumes a challenge. The consuming UPDATE is atomic, so a
+// challenge can be used at most once — a correct answer, a wrong answer, an
+// expired token or a reused token all resolve to a single attempt.
+async function consumeCaptcha(env, id, answer) {
+  if (typeof id !== "string" || !id || !Number.isFinite(answer)) return false;
+
+  let consumed;
+  try {
+    consumed = await env.DB
+      .prepare(
+        "UPDATE captcha_challenges SET consumed = 1 WHERE id = ? AND consumed = 0 AND expires_at > CURRENT_TIMESTAMP"
+      )
+      .bind(id)
+      .run();
+  } catch {
+    return false;
+  }
+
+  if (!consumed.meta || consumed.meta.changes !== 1) return false;
+
+  const row = await env.DB
+    .prepare("SELECT answer FROM captcha_challenges WHERE id = ?")
+    .bind(id)
+    .first();
+
+  return !!row && Number(row.answer) === answer;
+}
+
 async function handleStatus(env, slug, corsOrigin) {
   let meetup;
   try {
@@ -356,8 +443,7 @@ async function handleRegister(request, env, slug, corsOrigin) {
   const phoneNational = normalizePhone(body.phone);
   const phone = `+55${phoneNational}`;
   const consentLgpd = body.consentLgpd === true;
-  const captchaProvided =
-    body.captcha !== undefined && body.captcha !== null && String(body.captcha).trim() !== "";
+  const captchaId = String(body.captchaId || "");
   const captchaValue = Number(body.captcha);
 
   if (!name || name.length < 3) {
@@ -372,11 +458,8 @@ async function handleRegister(request, env, slug, corsOrigin) {
   if (!isValidBrazilMobile(phoneNational)) {
     return json({error: "Número de celular inválido"}, 400, corsOrigin);
   }
-  if (!captchaProvided) {
+  if (!captchaId || !Number.isFinite(captchaValue)) {
     return json({error: "Verificação obrigatória"}, 400, corsOrigin);
-  }
-  if (!Number.isFinite(captchaValue) || captchaValue < 0) {
-    return json({error: "Verificação inválida"}, 400, corsOrigin);
   }
   if (!consentLgpd) {
     return json({error: "Consentimento LGPD é obrigatório"}, 400, corsOrigin);
@@ -399,41 +482,36 @@ async function handleRegister(request, env, slug, corsOrigin) {
     return json({error: "Inscrições encerradas para este meetup"}, 409, corsOrigin);
   }
 
+  if (!(await consumeCaptcha(env, captchaId, captchaValue))) {
+    return json({error: "Verificação inválida ou expirada. Tente novamente."}, 400, corsOrigin);
+  }
+
   const encryptedDocument = await encryptField(document, env);
   const encryptedPhone = await encryptField(phone, env);
   const documentLast4 = document.slice(-4);
 
-  const gate = await env.DB
-    .prepare(
-      "UPDATE meetups SET registrations_count = registrations_count + 1, updated_at = CURRENT_TIMESTAMP WHERE slug = ? AND is_open = 1 AND registrations_count < capacity"
-    )
-    .bind(slug)
-    .run();
-
-  if (!gate.meta || gate.meta.changes !== 1) {
-    return json({error: "Inscrições encerradas para este meetup"}, 409, corsOrigin);
-  }
-
-  let registrationId;
-
+  // Claim a seat and insert the registration in a single atomic transaction, so a
+  // crash between the two can no longer leave the count incremented without a
+  // matching registration (undersell) or vice versa. Both statements are gated on
+  // capacity within the same transaction, so they either both apply (a seat was
+  // free) or both no-op (full). A failed batch rolls back entirely, so no manual
+  // decrement is needed on error.
+  let batchResults;
   try {
-    const inserted = await env.DB
-      .prepare(
-        "INSERT INTO registrations (meetup_slug, name, email, phone_encrypted, document_encrypted, document_last4, consent_lgpd) VALUES (?, ?, ?, ?, ?, ?, 1)"
-      )
-      .bind(slug, name, email, encryptedPhone, encryptedDocument, documentLast4)
-      .run();
-
-    registrationId = Number(inserted.meta?.last_row_id || 0);
+    batchResults = await env.DB.batch([
+      env.DB
+        .prepare(
+          "INSERT INTO registrations (meetup_slug, name, email, phone_encrypted, document_encrypted, document_last4, consent_lgpd) SELECT ?, ?, ?, ?, ?, ?, 1 FROM meetups WHERE slug = ? AND is_open = 1 AND registrations_count < capacity"
+        )
+        .bind(slug, name, email, encryptedPhone, encryptedDocument, documentLast4, slug),
+      env.DB
+        .prepare(
+          "UPDATE meetups SET registrations_count = registrations_count + 1, updated_at = CURRENT_TIMESTAMP WHERE slug = ? AND is_open = 1 AND registrations_count < capacity"
+        )
+        .bind(slug)
+    ]);
   } catch (err) {
     const message = String(err?.message || err || "");
-
-    await env.DB
-      .prepare(
-        "UPDATE meetups SET registrations_count = CASE WHEN registrations_count > 0 THEN registrations_count - 1 ELSE 0 END, updated_at = CURRENT_TIMESTAMP WHERE slug = ?"
-      )
-      .bind(slug)
-      .run();
 
     if (message.includes("UNIQUE constraint failed: registrations.meetup_slug, registrations.email")) {
       try {
@@ -466,6 +544,21 @@ async function handleRegister(request, env, slug, corsOrigin) {
     return json({error: "Falha ao registrar inscrição"}, 500, corsOrigin);
   }
 
+  const insertResult = batchResults[0];
+  const updateResult = batchResults[1];
+
+  // No seat was free: both gated statements matched no rows and nothing was written.
+  if (
+    !insertResult?.meta ||
+    insertResult.meta.changes !== 1 ||
+    !updateResult?.meta ||
+    updateResult.meta.changes !== 1
+  ) {
+    return json({error: "Inscrições encerradas para este meetup"}, 409, corsOrigin);
+  }
+
+  let registrationId = Number(insertResult.meta.last_row_id || 0);
+
   if (!registrationId) {
     const createdRegistration = await env.DB
       .prepare(
@@ -477,28 +570,10 @@ async function handleRegister(request, env, slug, corsOrigin) {
     registrationId = Number(createdRegistration?.id || 0);
   }
 
-  if (!registrationId) {
-    await env.DB
-      .prepare(
-        "DELETE FROM registrations WHERE meetup_slug = ? AND email = ?"
-      )
-      .bind(slug, email)
-      .run();
-
-    await env.DB
-      .prepare(
-        "UPDATE meetups SET registrations_count = CASE WHEN registrations_count > 0 THEN registrations_count - 1 ELSE 0 END, updated_at = CURRENT_TIMESTAMP WHERE slug = ?"
-      )
-      .bind(slug)
-      .run();
-
-    return json({error: "Falha ao criar agendamento de confirmação"}, 500, corsOrigin);
-  }
-
   let emailScheduled = false;
   try {
     const emailTemplate = await getEmailTemplateByMeetupSlug(env.DB, slug);
-    if (emailTemplate) {
+    if (emailTemplate && registrationId) {
       await queueConfirmationEmail(env, {
         meetupSlug: slug,
         templateId: Number(emailTemplate.id),
@@ -584,8 +659,7 @@ async function handleSponsorRegister(request, env, corsOrigin) {
   const phoneNational = normalizePhone(body.phone);
   const phone = `+55${phoneNational}`;
   const message = String(body.message || "").trim();
-  const captchaProvided =
-    body.captcha !== undefined && body.captcha !== null && String(body.captcha).trim() !== "";
+  const captchaId = String(body.captchaId || "");
   const captchaValue = Number(body.captcha);
 
   if (!company || company.length < 2 || company.length > 200) {
@@ -609,11 +683,11 @@ async function handleSponsorRegister(request, env, corsOrigin) {
   if (message.length > 2000) {
     return json({error: "Mensagem muito longa"}, 400, corsOrigin);
   }
-  if (!captchaProvided) {
+  if (!captchaId || !Number.isFinite(captchaValue)) {
     return json({error: "Verificação obrigatória"}, 400, corsOrigin);
   }
-  if (!Number.isFinite(captchaValue)) {
-    return json({error: "Verificação inválida"}, 400, corsOrigin);
+  if (!(await consumeCaptcha(env, captchaId, captchaValue))) {
+    return json({error: "Verificação inválida ou expirada. Tente novamente."}, 400, corsOrigin);
   }
 
   try {
@@ -733,8 +807,7 @@ async function handleTalkSubmit(request, env, corsOrigin) {
   const inPersonRaw = String(body.inPerson || "").trim().toLowerCase();
   const imageConsent = body.imageConsent === true;
   const termsAck = body.termsAck === true;
-  const captchaProvided =
-    body.captcha !== undefined && body.captcha !== null && String(body.captcha).trim() !== "";
+  const captchaId = String(body.captchaId || "");
   const captchaValue = Number(body.captcha);
 
   if (!title || title.length < 3 || title.length > 200) {
@@ -767,11 +840,11 @@ async function handleTalkSubmit(request, env, corsOrigin) {
   if (!termsAck) {
     return json({error: "É necessário confirmar ciência das orientações"}, 400, corsOrigin);
   }
-  if (!captchaProvided) {
+  if (!captchaId || !Number.isFinite(captchaValue)) {
     return json({error: "Verificação obrigatória"}, 400, corsOrigin);
   }
-  if (!Number.isFinite(captchaValue)) {
-    return json({error: "Verificação inválida"}, 400, corsOrigin);
+  if (!(await consumeCaptcha(env, captchaId, captchaValue))) {
+    return json({error: "Verificação inválida ou expirada. Tente novamente."}, 400, corsOrigin);
   }
 
   const inPerson = inPersonRaw === "sim" ? 1 : 0;
@@ -868,6 +941,10 @@ export default {
       return handleStatus(env, statusMatch[1], corsOrigin);
     }
 
+    if (request.method === "GET" && url.pathname === "/api/captcha") {
+      return handleCaptchaIssue(env, corsOrigin);
+    }
+
     const registerMatch = url.pathname.match(/^\/api\/meetups\/([a-z0-9-]+)\/register$/);
     if (request.method === "POST" && registerMatch) {
       return handleRegister(request, env, registerMatch[1], corsOrigin);
@@ -885,6 +962,17 @@ export default {
   },
 
   async scheduled(_event, env, ctx) {
-    ctx.waitUntil(processPendingEmailJobs(env));
+    ctx.waitUntil(
+      (async () => {
+        await processPendingEmailJobs(env);
+        try {
+          await env.DB
+            .prepare("DELETE FROM captcha_challenges WHERE expires_at < CURRENT_TIMESTAMP")
+            .run();
+        } catch {
+          // Best-effort cleanup; ignore (e.g. table not yet migrated).
+        }
+      })()
+    );
   }
 };

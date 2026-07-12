@@ -1027,6 +1027,28 @@ footer a {
   font-family: 'DM Mono', monospace;
 }
 
+/* Visible required-field marker. The native `required` attribute stays on the
+   inputs (announced by assistive tech); this asterisk is the sighted cue that
+   distinguishes required from optional fields. */
+.registration-field:has(> input[required], > textarea[required], > select[required]) > label::after,
+.registration-fieldset:has(input[required]) > legend::after {
+  content: " *";
+  color: #ff8f8f;
+  font-weight: 700;
+}
+
+.registration-required-note {
+  grid-column: 1 / -1;
+  margin: 0 0 0.2rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.registration-required-note .req {
+  color: #ff8f8f;
+  font-weight: 700;
+}
+
 .registration-help {
   color: #7f8a92;
   font-size: 0.78rem;
@@ -1094,6 +1116,8 @@ footer a {
   width: min(520px, 92vw);
   height: auto;
   min-height: 0;
+  max-height: 90vh;
+  overflow-y: auto;
   padding: 1.2rem 1.2rem 1rem;
 }
 
@@ -1154,22 +1178,18 @@ footer a {
   padding: 0 0.3rem;
 }
 
+.registration-radio-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.2rem;
+}
+
 .registration-radio {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  margin-right: 1.2rem;
   color: var(--text-muted);
   font-size: 0.9rem;
-}
-
-.c4p-heading {
-  margin-top: 1.2rem;
-  margin-bottom: 0.4rem;
-  font-size: 0.95rem;
-  color: var(--text-main);
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
 }
 
 .c4p-list {
@@ -1182,6 +1202,129 @@ footer a {
 
 .c4p-list li {
   margin-bottom: 0.25rem;
+}
+
+.c4p-duration-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0.2rem 0 0;
+  padding: 0.5rem 0.95rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(47, 195, 162, 0.4);
+  background: rgba(47, 195, 162, 0.12);
+  color: var(--accent-soft);
+  font-family: 'DM Mono', monospace;
+  font-size: 0.85rem;
+}
+
+.c4p-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 1rem;
+}
+
+.c4p-info-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 1.3rem;
+  background: rgba(15, 26, 32, 0.88);
+  border: 1px solid var(--border-soft);
+  border-radius: 14px;
+  box-shadow: var(--shadow-soft);
+  transition: border-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.c4p-info-card:hover {
+  border-color: rgba(47, 195, 162, 0.45);
+  transform: translateY(-2px);
+}
+
+.c4p-info-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 11px;
+  background: rgba(47, 195, 162, 0.1);
+  border: 1px solid rgba(47, 195, 162, 0.25);
+  font-size: 1.25rem;
+}
+
+.c4p-info-title {
+  font-size: 1.02rem;
+  margin: 0;
+}
+
+.c4p-info-card .c4p-list {
+  margin: 0;
+}
+
+.social-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.9rem;
+}
+
+.social-card {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 1rem;
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  background: rgba(11, 20, 26, 0.55);
+  color: var(--text-main);
+  text-decoration: none;
+  transition: border-color var(--transition-fast), background-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.social-card:hover {
+  border-color: var(--accent-soft);
+  background: rgba(47, 195, 162, 0.08);
+  transform: translateY(-2px);
+}
+
+.social-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 1px solid var(--border-soft);
+  color: var(--text-muted);
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.social-card:hover .social-icon {
+  color: var(--accent-soft);
+  border-color: var(--accent-soft);
+}
+
+.social-info {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.social-name {
+  font-weight: 600;
+  font-size: 0.98rem;
+}
+
+.social-handle {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 #registrationFeedbackModal.is-error .registration-feedback-title {

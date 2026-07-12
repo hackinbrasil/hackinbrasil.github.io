@@ -5,14 +5,29 @@ Também agenda e envia e-mails de confirmação com atraso de 10 minutos.
 
 ## Endpoints
 
+- `GET /api/captcha` — emite um desafio de verificação (id + pergunta)
 - `GET /api/meetups/:slug/status`
 - `POST /api/meetups/:slug/register`
 - `POST /api/sponsors` — solicitações de patrocínio (substitui o formulário do Airtable)
 - `POST /api/talks` — propostas de palestra / Call for Papers (substitui o formulário do Airtable)
 
+## Verificação (captcha) validada no servidor
+
+- `GET /api/captcha` gera uma operação aritmética, guarda a resposta na tabela
+  `captcha_challenges` (migração `0011`) e retorna apenas `{ id, question }` — a
+  resposta correta nunca é enviada ao cliente.
+- Cada envio (`register`/`sponsors`/`talks`) precisa incluir `captchaId` + `captcha`
+  (a resposta digitada). O backend valida com `consumeCaptcha`, que consome o desafio
+  de forma atômica: cada desafio permite **uma única tentativa** (acerto, erro,
+  expiração ou reuso), impedindo replay e força bruta sobre o pequeno espaço de respostas.
+- Desafios expirados são removidos pelo cron do Worker.
+- Limitação: a conta aritmética ainda é resolvível por um bot que leia a pergunta.
+  Recomenda-se somar **rate limiting** (regra da Cloudflare ou contador por IP) para
+  proteção real contra flood. O captcha aqui elimina o bypass trivial (`captcha: 1`).
+
 ## Solicitações de patrocínio (`POST /api/sponsors`)
 
-- Campos: `company`, `website`, `contactName`, `role`, `email`, `phone`, `message`, `captcha`.
+- Campos: `company`, `website`, `contactName`, `role`, `email`, `phone`, `message`, `captchaId`, `captcha`.
 - Armazenados em texto puro na tabela `sponsor_requests` (dados de contato comercial, não CPF).
 - Cada envio dispara imediatamente um e-mail via Resend para `SPONSOR_NOTIFY_EMAIL`
   (padrão `contato@hackinbrasil.com.br`), com `reply_to` apontando para o e-mail da empresa.
@@ -22,7 +37,7 @@ Também agenda e envia e-mails de confirmação com atraso de 10 minutos.
 ## Propostas de palestra (`POST /api/talks`)
 
 - Campos: `title`, `abstract`, `speakerName`, `email`, `phone` (opcional), `photoUrl`,
-  `bio`, `inPerson` (`sim`/`nao`), `imageConsent`, `termsAck`, `captcha`.
+  `bio`, `inPerson` (`sim`/`nao`), `imageConsent`, `termsAck`, `captchaId`, `captcha`.
 - Armazenados em texto puro na tabela `talk_proposals`.
 - Cada envio dispara imediatamente um e-mail via Resend para `TALK_NOTIFY_EMAIL`
   (padrão `contato@hackinbrasil.com.br`), com `reply_to` apontando para o e-mail da pessoa palestrante.
@@ -110,4 +125,4 @@ Comportamento de UX atual:
 - Inscrições antigas são carregadas para envio na primeira aplicação da migração `0002`.
 - Para editar próximas mensagens, atualize o registro em `email_templates`.
 - O limite diário está fixo em 100 envios.
-- Quando o envio falha, a próxima tentativa é reagendada para 24 horas depois (até 5 tentativas).
+- Quando o envio falha, a próxima tentativa é reagendada para 10 minutos depois (até 5 tentativas).

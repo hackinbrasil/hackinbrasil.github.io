@@ -94,10 +94,11 @@ permalink: /meetup-03-09-2026/
 
   <section class="meetup-card">
     <h2>Inscrição</h2>
-    <p class="meetup-subtitle" id="registration-status">
+    <p class="meetup-subtitle" id="registration-status" role="status" aria-live="polite">
       Carregando disponibilidade...
     </p>
     <form id="meetup-registration-form" class="registration-form" data-api-base="https://hackinbrasil-meetup-api.hi-c21.workers.dev" data-meetup-slug="meetup-03-09-2026" data-meetup-date="2026-09-03">
+      <p class="registration-required-note">Campos marcados com <span class="req" aria-hidden="true">*</span> são obrigatórios.</p>
       <div class="registration-field">
         <label for="reg-name">Nome completo</label>
         <input id="reg-name" class="registration-input" type="text" name="name" placeholder="Ex.: Bruno Almeida" required>
@@ -128,7 +129,7 @@ permalink: /meetup-03-09-2026/
         <a href="{{ '/politica-de-privacidade/' | relative_url }}" target="_blank" rel="noopener noreferrer">Política de Privacidade</a>.
       </label>
       <div class="registration-actions">
-        <button class="btn btn-primary" type="submit" id="registration-submit">
+        <button class="btn btn-primary" type="submit" id="registration-submit" disabled>
           Inscrever-se
         </button>
       </div>
@@ -171,4 +172,5 @@ permalink: /meetup-03-09-2026/
   </div>
 </div>
 
+<script src="{{ '/assets/js/form-utils.js' | relative_url }}"></script>
 <script src="{{ '/assets/js/meetup-registration.js' | relative_url }}"></script>

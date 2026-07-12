@@ -32,6 +32,7 @@ permalink: /quero-patrocinar/
   <section class="meetup-card">
     <h2>Dados para patrocínio</h2>
     <form id="sponsor-form" class="registration-form" data-api-base="https://hackinbrasil-meetup-api.hi-c21.workers.dev">
+      <p class="registration-required-note">Campos marcados com <span class="req" aria-hidden="true">*</span> são obrigatórios.</p>
       <div class="registration-field">
         <label for="sponsor-company">Empresa</label>
         <input id="sponsor-company" class="registration-input" type="text" name="company" placeholder="Nome da empresa" maxlength="200" required>
@@ -83,4 +84,5 @@ permalink: /quero-patrocinar/
   </div>
 </div>
 
+<script src="{{ '/assets/js/form-utils.js' | relative_url }}"></script>
 <script src="{{ '/assets/js/sponsor-registration.js' | relative_url }}"></script>

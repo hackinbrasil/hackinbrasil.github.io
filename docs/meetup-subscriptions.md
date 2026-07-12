@@ -171,7 +171,7 @@ npx wrangler secret put RESEND_API_KEY
 
 - `*/2 * * * *` processes pending `email_jobs`.
 - The sender uses a fixed limit of 100 sends per day.
-- Failed jobs are retried after 24 hours, up to 5 attempts.
+- Failed jobs are retried after 10 minutes, up to 5 attempts.
 
 ## Frontend integration
 

@@ -17,44 +17,55 @@ permalink: /submeter-palestra/
 </header>
 
 <main class="meetup-page">
-  <section class="meetup-card">
+  <section class="meetup-card c4p-hero">
     <p class="hero-kicker">Chamada para palestras</p>
     <h1 class="meetup-title">Envie sua proposta de palestra</h1>
     <p class="meetup-subtitle">
-      Neste formulário, você pode enviar propostas de palestras e conteúdos que gostaria de
-      apresentar <strong>presencialmente</strong>. Cada palestra precisa ter ao menos 25 minutos
-      de duração + 5 minutos para perguntas e respostas.
+      Compartilhe conhecimento com a comunidade: proponha palestras e conteúdos que gostaria de
+      apresentar <strong>presencialmente</strong> em um dos nossos meetups.
     </p>
+    <p class="c4p-duration-badge">
+      <span aria-hidden="true">⏱️</span> 25 min de palestra + 5 min de perguntas
+    </p>
+  </section>
 
-    <h3 class="c4p-heading">Orientações importantes</h3>
-    <ul class="c4p-list">
-      <li>O assunto da sua palestra deve ter alguma relação com Segurança da Informação;</li>
-      <li>
-        Este evento tem
-        <a href="{{ '/codigo-de-conduta/' | relative_url }}" target="_blank" rel="noopener noreferrer">Código de Conduta</a>
-        baseado no Codamos, que deverá ser respeitado por todas as pessoas;
-      </li>
-      <li>Você pode enviar quantas propostas quiser.</li>
-    </ul>
+  <section class="c4p-info-grid" aria-label="Como funciona a chamada de palestras">
+    <article class="c4p-info-card">
+      <span class="c4p-info-icon" aria-hidden="true">📋</span>
+      <h2 class="c4p-info-title">Orientações importantes</h2>
+      <ul class="c4p-list">
+        <li>O tema deve ter relação com Segurança da Informação;</li>
+        <li>
+          Respeite nosso
+          <a href="{{ '/codigo-de-conduta/' | relative_url }}" target="_blank" rel="noopener noreferrer">Código de Conduta</a>
+          (baseado no Codamos);
+        </li>
+        <li>Você pode enviar quantas propostas quiser.</li>
+      </ul>
+    </article>
 
-    <h3 class="c4p-heading">Processo de escolha</h3>
-    <ul class="c4p-list">
-      <li>
-        O grupo de pessoas organizadoras, que pode variar de acordo com a iniciativa, escolherá
-        as palestras mais relevantes aos objetivos do evento.
-      </li>
-    </ul>
+    <article class="c4p-info-card">
+      <span class="c4p-info-icon" aria-hidden="true">⭐</span>
+      <h2 class="c4p-info-title">Processo de escolha</h2>
+      <ul class="c4p-list">
+        <li>O grupo organizador seleciona as palestras mais relevantes aos objetivos de cada evento.</li>
+      </ul>
+    </article>
 
-    <h3 class="c4p-heading">Prazos</h3>
-    <ul class="c4p-list">
-      <li>Este formulário fica aberto para todos os eventos;</li>
-      <li>O resultado da seleção é enviado, no máximo, 7 dias antes de cada evento.</li>
-    </ul>
+    <article class="c4p-info-card">
+      <span class="c4p-info-icon" aria-hidden="true">🗓️</span>
+      <h2 class="c4p-info-title">Prazos</h2>
+      <ul class="c4p-list">
+        <li>O formulário fica aberto para todos os eventos;</li>
+        <li>O resultado é enviado até 7 dias antes de cada evento.</li>
+      </ul>
+    </article>
   </section>
 
   <section class="meetup-card">
     <h2>Sua proposta</h2>
     <form id="talk-form" class="registration-form" data-api-base="https://hackinbrasil-meetup-api.hi-c21.workers.dev">
+      <p class="registration-required-note">Campos marcados com <span class="req" aria-hidden="true">*</span> são obrigatórios.</p>
       <div class="registration-field registration-field-full">
         <label for="talk-title">Título da palestra</label>
         <input id="talk-title" class="registration-input" type="text" name="title" placeholder="Título da sua palestra" maxlength="200" required>
@@ -88,12 +99,14 @@ permalink: /submeter-palestra/
 
       <fieldset class="registration-field registration-field-full registration-fieldset">
         <legend>Você tem disponibilidade de palestrar de forma PRESENCIAL no Rio de Janeiro (RJ)?</legend>
-        <label class="registration-radio">
-          <input type="radio" name="inPerson" value="sim" required> Sim
-        </label>
-        <label class="registration-radio">
-          <input type="radio" name="inPerson" value="nao"> Não
-        </label>
+        <div class="registration-radio-group">
+          <label class="registration-radio">
+            <input type="radio" name="inPerson" value="sim" required> Sim
+          </label>
+          <label class="registration-radio">
+            <input type="radio" name="inPerson" value="nao"> Não
+          </label>
+        </div>
       </fieldset>
 
       <label class="registration-consent">
@@ -137,4 +150,5 @@ permalink: /submeter-palestra/
   </div>
 </div>
 
+<script src="{{ '/assets/js/form-utils.js' | relative_url }}"></script>
 <script src="{{ '/assets/js/talk-submission.js' | relative_url }}"></script>

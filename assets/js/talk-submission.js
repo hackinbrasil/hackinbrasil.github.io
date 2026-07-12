@@ -10,46 +10,45 @@
   const captchaQuestion = document.getElementById("talk-captcha-question");
 
   if (!form || !submit || !feedbackModal || !feedbackTitle || !feedbackMessage) return;
+  if (!window.HIBForms) return;
 
+  const F = window.HIBForms;
   const apiBase = (form.dataset.apiBase || "").trim().replace(/\/$/, "");
   const submitUrl = `${apiBase}/api/talks`;
 
-  function setFeedback(message, type) {
-    feedbackTitle.textContent = type === "success" ? "Proposta enviada" : "Não foi possível enviar";
-    feedbackMessage.textContent = message;
-    feedbackModal.classList.remove("is-success", "is-error");
-    feedbackModal.classList.add(type === "success" ? "is-success" : "is-error");
-    feedbackModal.classList.add("open");
-  }
+  const feedback = F.createFeedback(feedbackModal, feedbackTitle, feedbackMessage, {
+    success: "Proposta enviada",
+    error: "Não foi possível enviar"
+  });
+  const captcha = F.createCaptcha(captchaQuestion, captchaInput, apiBase);
 
   if (!apiBase || apiBase.includes("REPLACE-WITH-YOUR-WORKER-DOMAIN")) {
     submit.disabled = true;
-    setFeedback("Configuração pendente: defina o domínio da API no formulário.", "error");
+    feedback.show("Configuração pendente: defina o domínio da API no formulário.", "error");
     return;
   }
 
-  function onlyDigits(value) {
-    return String(value || "").replace(/\D+/g, "");
+  const requiredControls = {
+    "título": form.querySelector('[name="title"]'),
+    "descrição": form.querySelector('[name="abstract"]'),
+    "nome": form.querySelector('[name="speakerName"]'),
+    "e-mail": form.querySelector('[name="email"]'),
+    "link da foto": form.querySelector('[name="photoUrl"]'),
+    "minibio": form.querySelector('[name="bio"]'),
+    "disponibilidade presencial": form.querySelector('[name="inPerson"]'),
+    "uso de imagem": form.querySelector('[name="imageConsent"]'),
+    "ciência das orientações": form.querySelector('[name="termsAck"]'),
+    "verificação": captchaInput,
+    "pergunta de verificação": captchaQuestion
+  };
+  const missingControls = Object.keys(requiredControls).filter((label) => !requiredControls[label]);
+  if (missingControls.length > 0) {
+    submit.disabled = true;
+    feedback.show(`Formulário indisponível: campo(s) ausente(s) — ${missingControls.join(", ")}.`, "error");
+    return;
   }
 
-  // Contact phone (optional): accepts Brazilian mobile (11 digits) or landline (10 digits).
-  function normalizePhone(value) {
-    let digits = onlyDigits(value);
-    if (digits.length === 13 && digits.startsWith("55")) digits = digits.slice(2);
-    return digits.slice(0, 11);
-  }
-
-  function formatPhone(value) {
-    const digits = normalizePhone(value);
-    if (digits.length === 0) return "";
-    if (digits.length <= 2) return `(${digits}`;
-    return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
-  }
-
-  function isValidContactPhone(value) {
-    return /^[1-9][1-9]\d{8,9}$/.test(normalizePhone(value));
-  }
-
+  // Phone is optional here.
   function setPhoneErrorState(isInvalid) {
     if (!phoneInput) return;
     phoneInput.classList.toggle("is-invalid", isInvalid);
@@ -63,40 +62,14 @@
 
   if (phoneInput) {
     phoneInput.addEventListener("input", function () {
-      phoneInput.value = formatPhone(phoneInput.value);
-      const digits = normalizePhone(phoneInput.value);
+      phoneInput.value = F.formatPhone(phoneInput.value);
+      const digits = F.normalizePhone(phoneInput.value);
       if (digits.length === 0 || digits.length < 10) {
         setPhoneErrorState(false);
         return;
       }
-      setPhoneErrorState(!isValidContactPhone(phoneInput.value));
+      setPhoneErrorState(!F.isBrazilContactPhone(phoneInput.value));
     });
-  }
-
-  let captchaAnswer = null;
-
-  function renderCaptcha() {
-    if (!captchaQuestion) return;
-    const a = Math.floor(Math.random() * 9) + 1;
-    const b = Math.floor(Math.random() * 9) + 1;
-    const isAddition = Math.random() < 0.5;
-    let left = a;
-    let right = b;
-    if (!isAddition && left < right) {
-      const temp = left;
-      left = right;
-      right = temp;
-    }
-    captchaAnswer = isAddition ? left + right : left - right;
-    captchaQuestion.textContent = `${left} ${isAddition ? "+" : "−"} ${right}`;
-    if (captchaInput) captchaInput.value = "";
-  }
-
-  function isCaptchaValid() {
-    if (!captchaInput || captchaAnswer === null) return true;
-    const value = captchaInput.value.trim();
-    if (value === "") return false;
-    return Number(value) === captchaAnswer;
   }
 
   form.addEventListener("submit", async function (event) {
@@ -116,35 +89,36 @@
       termsAck: formData.get("termsAck") === "on"
     };
 
-    const phoneDigits = normalizePhone(phoneInput.value);
-    if (phoneDigits && !isValidContactPhone(phoneInput.value)) {
+    const phoneDigits = F.normalizePhone(phoneInput.value);
+    if (phoneDigits && !F.isBrazilContactPhone(phoneInput.value)) {
       setPhoneErrorState(true);
-      setFeedback("Número de telefone inválido. Use DDD + número, ex.: (11) 912345678.", "error");
+      feedback.show("Número de telefone inválido. Use DDD + número, ex.: (11) 912345678.", "error");
       return;
     }
     setPhoneErrorState(false);
 
     if (!payload.inPerson) {
-      setFeedback("Informe sua disponibilidade para palestrar presencialmente no Rio de Janeiro.", "error");
+      feedback.show("Informe sua disponibilidade para palestrar presencialmente no Rio de Janeiro.", "error");
       return;
     }
     if (!payload.imageConsent) {
-      setFeedback("É necessário autorizar o uso de imagem para enviar a proposta.", "error");
+      feedback.show("É necessário autorizar o uso de imagem para enviar a proposta.", "error");
       return;
     }
     if (!payload.termsAck) {
-      setFeedback("Confirme que está ciente das orientações para enviar a proposta.", "error");
+      feedback.show("Confirme que está ciente das orientações para enviar a proposta.", "error");
       return;
     }
 
-    if (!isCaptchaValid()) {
-      setFeedback("Resposta da verificação incorreta. Resolva a nova operação e tente novamente.", "error");
-      renderCaptcha();
+    if (!captcha.ready()) {
+      feedback.show("Resolva a verificação antes de enviar.", "error");
+      captcha.render();
       return;
     }
 
     payload.phone = phoneDigits ? `+55${phoneDigits}` : "";
-    payload.captcha = Number(captchaInput.value);
+    payload.captchaId = captcha.getToken();
+    payload.captcha = Number(captcha.getAnswer());
 
     submit.disabled = true;
     submit.textContent = "Enviando...";
@@ -159,7 +133,9 @@
       const data = await res.json();
 
       if (!res.ok) {
-        setFeedback(data.error || "Não foi possível enviar a proposta.", "error");
+        feedback.show(data.error || "Não foi possível enviar a proposta.", "error");
+        // The challenge is single-use and now spent — fetch a fresh one to retry.
+        captcha.render();
         submit.disabled = false;
         submit.textContent = "Enviar proposta";
         return;
@@ -173,15 +149,16 @@
 
       form.reset();
       setPhoneErrorState(false);
-      renderCaptcha();
+      captcha.render();
       submit.disabled = false;
       submit.textContent = "Enviar proposta";
     } catch {
-      setFeedback("Erro de conexão. Tente novamente.", "error");
+      feedback.show("Erro de conexão. Tente novamente.", "error");
+      captcha.render();
       submit.disabled = false;
       submit.textContent = "Enviar proposta";
     }
   });
 
-  renderCaptcha();
+  captcha.render();
 })();
