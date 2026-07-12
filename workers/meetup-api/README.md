@@ -8,6 +8,7 @@ Também agenda e envia e-mails de confirmação com atraso de 10 minutos.
 - `GET /api/meetups/:slug/status`
 - `POST /api/meetups/:slug/register`
 - `POST /api/sponsors` — solicitações de patrocínio (substitui o formulário do Airtable)
+- `POST /api/talks` — propostas de palestra / Call for Papers (substitui o formulário do Airtable)
 
 ## Solicitações de patrocínio (`POST /api/sponsors`)
 
@@ -17,6 +18,17 @@ Também agenda e envia e-mails de confirmação com atraso de 10 minutos.
   (padrão `contato@hackinbrasil.com.br`), com `reply_to` apontando para o e-mail da empresa.
 - Frontend: página nativa `quero-patrocinar.html` (`/quero-patrocinar/`) + `assets/js/sponsor-registration.js`.
 - Migração da tabela: `migrations/0009_sponsor_requests.sql`.
+
+## Propostas de palestra (`POST /api/talks`)
+
+- Campos: `title`, `abstract`, `speakerName`, `email`, `phone` (opcional), `photoUrl`,
+  `bio`, `inPerson` (`sim`/`nao`), `imageConsent`, `termsAck`, `captcha`.
+- Armazenados em texto puro na tabela `talk_proposals`.
+- Cada envio dispara imediatamente um e-mail via Resend para `TALK_NOTIFY_EMAIL`
+  (padrão `contato@hackinbrasil.com.br`), com `reply_to` apontando para o e-mail da pessoa palestrante.
+- `photoUrl` aceita apenas URLs `http`/`https`; consentimento de imagem e ciência das orientações são obrigatórios.
+- Frontend: página nativa `submeter-palestra.html` (`/submeter-palestra/`) + `assets/js/talk-submission.js`.
+- Migração da tabela: `migrations/0010_talk_proposals.sql`.
 
 ## Dados coletados
 

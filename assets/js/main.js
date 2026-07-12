@@ -18,15 +18,6 @@ if (newsletterForm) {
   });
 }
 
-function setupModal(triggerId, modalId) {
-  const trigger = document.getElementById(triggerId);
-  const modal = document.getElementById(modalId);
-  if (!trigger || !modal) return;
-  trigger.addEventListener("click", () => modal.classList.add("open"));
-}
-
-setupModal("openSpeakersModal", "speakersModal");
-
 document.querySelectorAll("[data-close]").forEach(btn =>
   btn.addEventListener("click", () => {
     const modal = btn.closest(".modal");

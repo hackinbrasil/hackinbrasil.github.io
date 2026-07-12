@@ -1130,7 +1130,8 @@ footer a {
 }
 
 #registrationFeedbackModal.is-success .registration-feedback-title,
-#sponsorFeedbackModal.is-success .registration-feedback-title {
+#sponsorFeedbackModal.is-success .registration-feedback-title,
+#talkFeedbackModal.is-success .registration-feedback-title {
   color: #2fc3a2;
 }
 
@@ -1138,6 +1139,49 @@ footer a {
   min-height: 96px;
   resize: vertical;
   line-height: 1.5;
+}
+
+.registration-fieldset {
+  border: 1px solid var(--border-soft);
+  border-radius: 9px;
+  padding: 0.8rem 0.9rem;
+}
+
+.registration-fieldset legend {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-family: 'DM Mono', monospace;
+  padding: 0 0.3rem;
+}
+
+.registration-radio {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-right: 1.2rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.c4p-heading {
+  margin-top: 1.2rem;
+  margin-bottom: 0.4rem;
+  font-size: 0.95rem;
+  color: var(--text-main);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.c4p-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.c4p-list li {
+  margin-bottom: 0.25rem;
 }
 
 #registrationFeedbackModal.is-error .registration-feedback-title {

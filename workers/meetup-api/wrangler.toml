@@ -12,6 +12,7 @@ ALLOWED_ORIGIN = "https://hackinbrasil.com.br,https://www.hackinbrasil.com.br"
 RESEND_FROM_EMAIL = "Hack in Brasil <contato@hackinbrasil.com.br>"
 RESEND_REPLY_TO = "contato@hackinbrasil.com.br"
 SPONSOR_NOTIFY_EMAIL = "contato@hackinbrasil.com.br"
+TALK_NOTIFY_EMAIL = "contato@hackinbrasil.com.br"
 
 [triggers]
 crons = ["*/2 * * * *"]

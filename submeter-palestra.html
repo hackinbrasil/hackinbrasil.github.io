@@ -1,0 +1,140 @@
+---
+layout: default
+title: Submeter palestra | Hack in Brasil
+permalink: /submeter-palestra/
+---
+<header class="nav">
+  <div class="nav-left">
+    <a class="nav-brand" href="{{ '/' | relative_url }}">
+      <img class="nav-logo" src="{{ '/assets/images/hackinbrasil.png' | relative_url }}" alt="Logo Hack in Brasil">
+      <span>Hack in Brasil</span>
+    </a>
+    <span class="nav-logo-tag">Call for Papers</span>
+  </div>
+  <nav class="nav-right nav-right-static">
+    <a class="nav-link" href="{{ '/' | relative_url }}">Voltar para início</a>
+  </nav>
+</header>
+
+<main class="meetup-page">
+  <section class="meetup-card">
+    <p class="hero-kicker">Chamada para palestras</p>
+    <h1 class="meetup-title">Envie sua proposta de palestra</h1>
+    <p class="meetup-subtitle">
+      Neste formulário, você pode enviar propostas de palestras e conteúdos que gostaria de
+      apresentar <strong>presencialmente</strong>. Cada palestra precisa ter ao menos 25 minutos
+      de duração + 5 minutos para perguntas e respostas.
+    </p>
+
+    <h3 class="c4p-heading">Orientações importantes</h3>
+    <ul class="c4p-list">
+      <li>O assunto da sua palestra deve ter alguma relação com Segurança da Informação;</li>
+      <li>
+        Este evento tem
+        <a href="{{ '/codigo-de-conduta/' | relative_url }}" target="_blank" rel="noopener noreferrer">Código de Conduta</a>
+        baseado no Codamos, que deverá ser respeitado por todas as pessoas;
+      </li>
+      <li>Você pode enviar quantas propostas quiser.</li>
+    </ul>
+
+    <h3 class="c4p-heading">Processo de escolha</h3>
+    <ul class="c4p-list">
+      <li>
+        O grupo de pessoas organizadoras, que pode variar de acordo com a iniciativa, escolherá
+        as palestras mais relevantes aos objetivos do evento.
+      </li>
+    </ul>
+
+    <h3 class="c4p-heading">Prazos</h3>
+    <ul class="c4p-list">
+      <li>Este formulário fica aberto para todos os eventos;</li>
+      <li>O resultado da seleção é enviado, no máximo, 7 dias antes de cada evento.</li>
+    </ul>
+  </section>
+
+  <section class="meetup-card">
+    <h2>Sua proposta</h2>
+    <form id="talk-form" class="registration-form" data-api-base="https://hackinbrasil-meetup-api.hi-c21.workers.dev">
+      <div class="registration-field registration-field-full">
+        <label for="talk-title">Título da palestra</label>
+        <input id="talk-title" class="registration-input" type="text" name="title" placeholder="Título da sua palestra" maxlength="200" required>
+      </div>
+      <div class="registration-field registration-field-full">
+        <label for="talk-abstract">Descreva um pouco do conteúdo que pretende apresentar</label>
+        <textarea id="talk-abstract" class="registration-input registration-textarea" name="abstract" rows="5" maxlength="5000" placeholder="Resumo do conteúdo, objetivos e o que o público vai aprender." required></textarea>
+      </div>
+      <div class="registration-field">
+        <label for="talk-name">Como podemos te chamar?</label>
+        <input id="talk-name" class="registration-input" type="text" name="speakerName" placeholder="Seu nome ou como prefere ser chamado(a)" maxlength="200" required>
+      </div>
+      <div class="registration-field">
+        <label for="talk-email">E-mail</label>
+        <input id="talk-email" class="registration-input" type="email" name="email" placeholder="exemplo@dominio.com" required>
+      </div>
+      <div class="registration-field">
+        <label for="talk-phone">Telefone (opcional)</label>
+        <input id="talk-phone" class="registration-input" type="tel" name="phone" placeholder="(11) 912345678" inputmode="numeric" autocomplete="tel-national" maxlength="15">
+        <small id="talk-phone-help" class="registration-help">Opcional. DDD + número, com +55 (Brasil). Ex.: (11) 912345678.</small>
+      </div>
+      <div class="registration-field">
+        <label for="talk-photo">Link público de uma foto sua em boa qualidade</label>
+        <input id="talk-photo" class="registration-input" type="url" name="photoUrl" placeholder="https://..." maxlength="500" required>
+        <small class="registration-help">Usaremos na divulgação. Ex.: link do Drive, Dropbox ou rede social (público).</small>
+      </div>
+      <div class="registration-field registration-field-full">
+        <label for="talk-bio">Sua minibio</label>
+        <textarea id="talk-bio" class="registration-input registration-textarea" name="bio" rows="4" maxlength="3000" placeholder="Um breve resumo sobre você para apresentarmos ao público." required></textarea>
+      </div>
+
+      <fieldset class="registration-field registration-field-full registration-fieldset">
+        <legend>Você tem disponibilidade de palestrar de forma PRESENCIAL no Rio de Janeiro (RJ)?</legend>
+        <label class="registration-radio">
+          <input type="radio" name="inPerson" value="sim" required> Sim
+        </label>
+        <label class="registration-radio">
+          <input type="radio" name="inPerson" value="nao"> Não
+        </label>
+      </fieldset>
+
+      <label class="registration-consent">
+        <input type="checkbox" name="imageConsent" required>
+        <span>
+          <strong>Termo de uso de imagem:</strong> autorizo o Hack in Brasil a utilizar minha
+          imagem, voz e nome para fins de divulgação e promoção das atividades relacionadas ao
+          evento, em conformidade com a LGPD (Lei nº 13.709/2018).
+        </span>
+      </label>
+
+      <label class="registration-consent">
+        <input type="checkbox" name="termsAck" required>
+        <span>
+          Estou ciente de que também preciso me inscrever no evento e ficar atento(a) ao contato
+          da organização. Caso precise de algum equipamento específico para a apresentação,
+          avisarei com antecedência para que a possibilidade seja verificada.
+        </span>
+      </label>
+
+      <div class="registration-field registration-field-full">
+        <label for="talk-captcha">Verificação: quanto é <span id="talk-captcha-question"></span>?</label>
+        <input id="talk-captcha" class="registration-input" type="text" name="captcha" inputmode="numeric" autocomplete="off" placeholder="Resultado" required>
+        <small class="registration-help">Resolva a operação para confirmar que você não é um robô.</small>
+      </div>
+
+      <div class="registration-actions">
+        <button class="btn btn-primary" type="submit" id="talk-submit">
+          Enviar proposta
+        </button>
+      </div>
+    </form>
+  </section>
+</main>
+
+<div class="modal" id="talkFeedbackModal" aria-hidden="true">
+  <div class="modal-content modal-content--feedback">
+    <button class="modal-close" data-close aria-label="Fechar">✕</button>
+    <h3 id="talk-feedback-title" class="registration-feedback-title"></h3>
+    <p id="talk-feedback-message" class="registration-feedback-message"></p>
+  </div>
+</div>
+
+<script src="{{ '/assets/js/talk-submission.js' | relative_url }}"></script>

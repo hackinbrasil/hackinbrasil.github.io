@@ -85,6 +85,16 @@ function isValidBrazilContactPhone(nationalDigits) {
   return /^[1-9][1-9]\d{8,9}$/.test(nationalDigits);
 }
 
+function isHttpUrl(value) {
+  let url;
+  try {
+    url = new URL(value);
+  } catch {
+    return false;
+  }
+  return url.protocol === "http:" || url.protocol === "https:";
+}
+
 function escapeHtml(value) {
   return String(value == null ? "" : value)
     .replace(/&/g, "&amp;")
@@ -663,6 +673,180 @@ async function handleSponsorRegister(request, env, corsOrigin) {
   );
 }
 
+function buildTalkNotificationEmail(data) {
+  const rows = [
+    ["Título", data.title],
+    ["Palestrante", data.speakerName],
+    ["E-mail", data.email],
+    ["Telefone", data.phone || "—"],
+    ["Presencial no RJ", data.inPerson ? "Sim" : "Não"],
+    ["Link da foto", data.photoUrl],
+    ["Minibio", data.bio],
+    ["Descrição da palestra", data.abstract],
+    ["Autoriza uso de imagem", data.imageConsent ? "Sim" : "Não"],
+    ["Ciente das orientações", data.termsAck ? "Sim" : "Não"]
+  ];
+
+  const subject = `Nova proposta de palestra — ${data.title}`;
+
+  const textBody = [
+    "Uma nova proposta de palestra foi enviada pelo site.",
+    "",
+    ...rows.map(([label, value]) => `${label}: ${value}`),
+    "",
+    "Responda diretamente a este e-mail para entrar em contato com a pessoa palestrante."
+  ].join("\n");
+
+  const htmlRows = rows
+    .map(
+      ([label, value]) =>
+        `<tr><td style="padding:6px 12px 6px 0;font-weight:600;vertical-align:top;white-space:nowrap;">${escapeHtml(
+          label
+        )}</td><td style="padding:6px 0;">${escapeHtml(value).replace(/\n/g, "<br>")}</td></tr>`
+    )
+    .join("");
+
+  const htmlBody = `<p>Uma nova proposta de palestra foi enviada pelo site.</p>` +
+    `<table style="border-collapse:collapse;font-size:14px;">${htmlRows}</table>` +
+    `<p style="color:#666;font-size:13px;">Responda diretamente a este e-mail para entrar em contato com a pessoa palestrante.</p>`;
+
+  return {subject, textBody, htmlBody};
+}
+
+async function handleTalkSubmit(request, env, corsOrigin) {
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return json({error: "Invalid JSON body"}, 400, corsOrigin);
+  }
+
+  const title = String(body.title || "").trim();
+  const abstract = String(body.abstract || "").trim();
+  const speakerName = String(body.speakerName || "").trim();
+  const email = String(body.email || "").trim().toLowerCase();
+  const phoneRaw = String(body.phone || "").trim();
+  const phoneNational = normalizePhone(phoneRaw);
+  const phone = phoneRaw ? `+55${phoneNational}` : "";
+  const photoUrl = String(body.photoUrl || "").trim();
+  const bio = String(body.bio || "").trim();
+  const inPersonRaw = String(body.inPerson || "").trim().toLowerCase();
+  const imageConsent = body.imageConsent === true;
+  const termsAck = body.termsAck === true;
+  const captchaProvided =
+    body.captcha !== undefined && body.captcha !== null && String(body.captcha).trim() !== "";
+  const captchaValue = Number(body.captcha);
+
+  if (!title || title.length < 3 || title.length > 200) {
+    return json({error: "Título inválido"}, 400, corsOrigin);
+  }
+  if (!abstract || abstract.length < 10 || abstract.length > 5000) {
+    return json({error: "Descrição da palestra inválida"}, 400, corsOrigin);
+  }
+  if (!speakerName || speakerName.length < 2 || speakerName.length > 200) {
+    return json({error: "Nome inválido"}, 400, corsOrigin);
+  }
+  if (!isValidEmail(email)) {
+    return json({error: "E-mail inválido"}, 400, corsOrigin);
+  }
+  if (phoneRaw && !isValidBrazilContactPhone(phoneNational)) {
+    return json({error: "Número de telefone inválido"}, 400, corsOrigin);
+  }
+  if (!photoUrl || photoUrl.length > 500 || !isHttpUrl(photoUrl)) {
+    return json({error: "Link da foto inválido"}, 400, corsOrigin);
+  }
+  if (!bio || bio.length < 10 || bio.length > 3000) {
+    return json({error: "Minibio inválida"}, 400, corsOrigin);
+  }
+  if (inPersonRaw !== "sim" && inPersonRaw !== "nao") {
+    return json({error: "Informe sua disponibilidade presencial"}, 400, corsOrigin);
+  }
+  if (!imageConsent) {
+    return json({error: "É necessário autorizar o uso de imagem"}, 400, corsOrigin);
+  }
+  if (!termsAck) {
+    return json({error: "É necessário confirmar ciência das orientações"}, 400, corsOrigin);
+  }
+  if (!captchaProvided) {
+    return json({error: "Verificação obrigatória"}, 400, corsOrigin);
+  }
+  if (!Number.isFinite(captchaValue)) {
+    return json({error: "Verificação inválida"}, 400, corsOrigin);
+  }
+
+  const inPerson = inPersonRaw === "sim" ? 1 : 0;
+
+  try {
+    await env.DB
+      .prepare(
+        "INSERT INTO talk_proposals (title, abstract, speaker_name, email, phone, photo_url, bio, in_person, image_consent, terms_ack) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+      )
+      .bind(
+        title,
+        abstract,
+        speakerName,
+        email,
+        phone || null,
+        photoUrl,
+        bio,
+        inPerson,
+        imageConsent ? 1 : 0,
+        termsAck ? 1 : 0
+      )
+      .run();
+  } catch (err) {
+    const dbMessage = String(err?.message || err || "");
+    if (dbMessage.includes("no such table")) {
+      return json(
+        {error: "Database not initialized. Apply D1 migrations before using the API."},
+        500,
+        corsOrigin
+      );
+    }
+    return json({error: "Falha ao registrar proposta de palestra"}, 500, corsOrigin);
+  }
+
+  const notify = buildTalkNotificationEmail({
+    title,
+    abstract,
+    speakerName,
+    email,
+    phone,
+    photoUrl,
+    bio,
+    inPerson: inPerson === 1,
+    imageConsent,
+    termsAck
+  });
+
+  let emailSent = false;
+  try {
+    const recipient =
+      env.TALK_NOTIFY_EMAIL || env.RESEND_REPLY_TO || "contato@hackinbrasil.com.br";
+    await sendEmailWithResend(env, {
+      recipient_email: recipient,
+      subject: notify.subject,
+      html_body: notify.htmlBody,
+      text_body: notify.textBody,
+      reply_to: email
+    });
+    emailSent = true;
+  } catch {
+    // The proposal is already stored; a failed notification must not fail the request.
+    emailSent = false;
+  }
+
+  return json(
+    {
+      ok: true,
+      message: "Proposta de palestra enviada com sucesso",
+      emailSent
+    },
+    201,
+    corsOrigin
+  );
+}
+
 export default {
   async fetch(request, env) {
     const corsOrigin = getCorsOrigin(request, env);
@@ -691,6 +875,10 @@ export default {
 
     if (request.method === "POST" && url.pathname === "/api/sponsors") {
       return handleSponsorRegister(request, env, corsOrigin);
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/talks") {
+      return handleTalkSubmit(request, env, corsOrigin);
     }
 
     return json({error: "Not found"}, 404, corsOrigin);
