@@ -1,0 +1,86 @@
+---
+layout: default
+title: Quero patrocinar | Hack in Brasil
+permalink: /quero-patrocinar/
+---
+<header class="nav">
+  <div class="nav-left">
+    <a class="nav-brand" href="{{ '/' | relative_url }}">
+      <img class="nav-logo" src="{{ '/assets/images/hackinbrasil.png' | relative_url }}" alt="Logo Hack in Brasil">
+      <span>Hack in Brasil</span>
+    </a>
+    <span class="nav-logo-tag">Patrocínio</span>
+  </div>
+  <nav class="nav-right nav-right-static">
+    <a class="nav-link" href="{{ '/' | relative_url }}">Voltar para início</a>
+  </nav>
+</header>
+
+<main class="meetup-page">
+  <section class="meetup-card">
+    <p class="hero-kicker">Chamada de Patrocinadores</p>
+    <h1 class="meetup-title">Quer patrocinar um meetup?</h1>
+    <p class="meetup-subtitle">
+      Então se inscreva abaixo e aguarde o nosso retorno.
+    </p>
+    <p class="meetup-subtitle">
+      <strong>Atenção:</strong> nossa equipe irá entrar em contato através do e-mail detalhado
+      abaixo em até 48h. Preste atenção no preenchimento e fique atento ao seu e-mail.
+    </p>
+  </section>
+
+  <section class="meetup-card">
+    <h2>Dados para patrocínio</h2>
+    <form id="sponsor-form" class="registration-form" data-api-base="https://hackinbrasil-meetup-api.hi-c21.workers.dev">
+      <div class="registration-field">
+        <label for="sponsor-company">Empresa</label>
+        <input id="sponsor-company" class="registration-input" type="text" name="company" placeholder="Nome da empresa" maxlength="200" required>
+      </div>
+      <div class="registration-field">
+        <label for="sponsor-website">Site da empresa</label>
+        <input id="sponsor-website" class="registration-input" type="text" name="website" placeholder="https://empresa.com.br" maxlength="300" autocomplete="url">
+      </div>
+      <div class="registration-field">
+        <label for="sponsor-contact">Pessoa para contato</label>
+        <input id="sponsor-contact" class="registration-input" type="text" name="contactName" placeholder="Nome completo" maxlength="200" required>
+      </div>
+      <div class="registration-field">
+        <label for="sponsor-role">Cargo</label>
+        <input id="sponsor-role" class="registration-input" type="text" name="role" placeholder="Ex.: Head de Marketing" maxlength="150">
+      </div>
+      <div class="registration-field">
+        <label for="sponsor-email">Seu melhor e-mail</label>
+        <input id="sponsor-email" class="registration-input" type="email" name="email" placeholder="contato@empresa.com.br" required>
+      </div>
+      <div class="registration-field">
+        <label for="sponsor-phone">Celular para contato</label>
+        <input id="sponsor-phone" class="registration-input" type="tel" name="phone" placeholder="(11) 912345678" inputmode="numeric" autocomplete="tel-national" maxlength="15" required>
+        <small id="sponsor-phone-help" class="registration-help">DDD + número, com +55 (Brasil). Ex.: (11) 912345678.</small>
+      </div>
+      <div class="registration-field registration-field-full">
+        <label for="sponsor-message">Mensagem / observações</label>
+        <textarea id="sponsor-message" class="registration-input registration-textarea" name="message" rows="4" maxlength="2000" placeholder="Conte um pouco sobre o interesse da empresa em patrocinar (opcional)."></textarea>
+      </div>
+      <div class="registration-field registration-field-full">
+        <label for="sponsor-captcha">Verificação: quanto é <span id="sponsor-captcha-question"></span>?</label>
+        <input id="sponsor-captcha" class="registration-input" type="text" name="captcha" inputmode="numeric" autocomplete="off" placeholder="Resultado" required>
+        <small class="registration-help">Resolva a operação para confirmar que você não é um robô.</small>
+      </div>
+      <div class="registration-actions">
+        <button class="btn btn-primary" type="submit" id="sponsor-submit">
+          Enviar solicitação
+        </button>
+      </div>
+    </form>
+  </section>
+</main>
+
+<div class="modal" id="sponsorFeedbackModal" aria-hidden="true">
+  <div class="modal-content modal-content--feedback">
+    <button class="modal-close" data-close aria-label="Fechar">✕</button>
+    <h3 id="sponsor-feedback-title" class="registration-feedback-title"></h3>
+    <p id="sponsor-feedback-message" class="registration-feedback-message"></p>
+  </div>
+</div>
+
+<script src="{{ '/assets/js/sponsor-registration.js' | relative_url }}"></script>

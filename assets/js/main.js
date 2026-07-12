@@ -25,7 +25,6 @@ function setupModal(triggerId, modalId) {
   trigger.addEventListener("click", () => modal.classList.add("open"));
 }
 
-setupModal("openSponsorsModal", "sponsorsModal");
 setupModal("openSpeakersModal", "speakersModal");
 
 document.querySelectorAll("[data-close]").forEach(btn =>

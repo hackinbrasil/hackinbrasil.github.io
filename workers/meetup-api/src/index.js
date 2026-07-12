@@ -78,6 +78,22 @@ function isValidBrazilMobile(nationalDigits) {
   return /^[1-9][1-9]9\d{8}$/.test(nationalDigits);
 }
 
+// Contact phone for sponsors is more permissive than an attendee mobile: it
+// accepts both mobiles (11 digits) and landlines (10 digits), since a company
+// may give either. DDD must not start with 0.
+function isValidBrazilContactPhone(nationalDigits) {
+  return /^[1-9][1-9]\d{8,9}$/.test(nationalDigits);
+}
+
+function escapeHtml(value) {
+  return String(value == null ? "" : value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function truncateError(value, maxLength = 500) {
   const text = String(value || "");
   if (text.length <= maxLength) return text;
@@ -187,8 +203,9 @@ async function sendEmailWithResend(env, job) {
     text: job.text_body
   };
 
-  if (env.RESEND_REPLY_TO) {
-    body.reply_to = env.RESEND_REPLY_TO;
+  const replyTo = job.reply_to || env.RESEND_REPLY_TO;
+  if (replyTo) {
+    body.reply_to = replyTo;
   }
 
   const response = await fetch("https://api.resend.com/emails", {
@@ -504,6 +521,148 @@ async function handleRegister(request, env, slug, corsOrigin) {
   );
 }
 
+function buildSponsorNotificationEmail(data) {
+  const rows = [
+    ["Empresa", data.company],
+    ["Site da empresa", data.website || "—"],
+    ["Pessoa para contato", data.contactName],
+    ["Cargo", data.role || "—"],
+    ["E-mail", data.email],
+    ["Celular para contato", data.phone],
+    ["Mensagem / observações", data.message || "—"]
+  ];
+
+  const subject = `Nova solicitação de patrocínio — ${data.company}`;
+
+  const textBody = [
+    "Uma nova solicitação de patrocínio foi enviada pelo site.",
+    "",
+    ...rows.map(([label, value]) => `${label}: ${value}`),
+    "",
+    "Responda diretamente a este e-mail para entrar em contato com a empresa."
+  ].join("\n");
+
+  const htmlRows = rows
+    .map(
+      ([label, value]) =>
+        `<tr><td style="padding:6px 12px 6px 0;font-weight:600;vertical-align:top;white-space:nowrap;">${escapeHtml(
+          label
+        )}</td><td style="padding:6px 0;">${escapeHtml(value).replace(/\n/g, "<br>")}</td></tr>`
+    )
+    .join("");
+
+  const htmlBody = `<p>Uma nova solicitação de patrocínio foi enviada pelo site.</p>` +
+    `<table style="border-collapse:collapse;font-size:14px;">${htmlRows}</table>` +
+    `<p style="color:#666;font-size:13px;">Responda diretamente a este e-mail para entrar em contato com a empresa.</p>`;
+
+  return {subject, textBody, htmlBody};
+}
+
+async function handleSponsorRegister(request, env, corsOrigin) {
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return json({error: "Invalid JSON body"}, 400, corsOrigin);
+  }
+
+  const company = String(body.company || "").trim();
+  const website = String(body.website || "").trim();
+  const contactName = String(body.contactName || "").trim();
+  const role = String(body.role || "").trim();
+  const email = String(body.email || "").trim().toLowerCase();
+  const phoneNational = normalizePhone(body.phone);
+  const phone = `+55${phoneNational}`;
+  const message = String(body.message || "").trim();
+  const captchaProvided =
+    body.captcha !== undefined && body.captcha !== null && String(body.captcha).trim() !== "";
+  const captchaValue = Number(body.captcha);
+
+  if (!company || company.length < 2 || company.length > 200) {
+    return json({error: "Nome da empresa inválido"}, 400, corsOrigin);
+  }
+  if (website.length > 300) {
+    return json({error: "Site da empresa inválido"}, 400, corsOrigin);
+  }
+  if (!contactName || contactName.length < 3 || contactName.length > 200) {
+    return json({error: "Nome de contato inválido"}, 400, corsOrigin);
+  }
+  if (role.length > 150) {
+    return json({error: "Cargo inválido"}, 400, corsOrigin);
+  }
+  if (!isValidEmail(email)) {
+    return json({error: "E-mail inválido"}, 400, corsOrigin);
+  }
+  if (!isValidBrazilContactPhone(phoneNational)) {
+    return json({error: "Número de celular inválido"}, 400, corsOrigin);
+  }
+  if (message.length > 2000) {
+    return json({error: "Mensagem muito longa"}, 400, corsOrigin);
+  }
+  if (!captchaProvided) {
+    return json({error: "Verificação obrigatória"}, 400, corsOrigin);
+  }
+  if (!Number.isFinite(captchaValue)) {
+    return json({error: "Verificação inválida"}, 400, corsOrigin);
+  }
+
+  try {
+    await env.DB
+      .prepare(
+        "INSERT INTO sponsor_requests (company, website, contact_name, role, email, phone, message) VALUES (?, ?, ?, ?, ?, ?, ?)"
+      )
+      .bind(company, website || null, contactName, role || null, email, phone, message || null)
+      .run();
+  } catch (err) {
+    const dbMessage = String(err?.message || err || "");
+    if (dbMessage.includes("no such table")) {
+      return json(
+        {error: "Database not initialized. Apply D1 migrations before using the API."},
+        500,
+        corsOrigin
+      );
+    }
+    return json({error: "Falha ao registrar solicitação de patrocínio"}, 500, corsOrigin);
+  }
+
+  const notify = buildSponsorNotificationEmail({
+    company,
+    website,
+    contactName,
+    role,
+    email,
+    phone,
+    message
+  });
+
+  let emailSent = false;
+  try {
+    const recipient =
+      env.SPONSOR_NOTIFY_EMAIL || env.RESEND_REPLY_TO || "contato@hackinbrasil.com.br";
+    await sendEmailWithResend(env, {
+      recipient_email: recipient,
+      subject: notify.subject,
+      html_body: notify.htmlBody,
+      text_body: notify.textBody,
+      reply_to: email
+    });
+    emailSent = true;
+  } catch {
+    // The lead is already stored; a failed notification must not fail the request.
+    emailSent = false;
+  }
+
+  return json(
+    {
+      ok: true,
+      message: "Solicitação de patrocínio enviada com sucesso",
+      emailSent
+    },
+    201,
+    corsOrigin
+  );
+}
+
 export default {
   async fetch(request, env) {
     const corsOrigin = getCorsOrigin(request, env);
@@ -528,6 +687,10 @@ export default {
     const registerMatch = url.pathname.match(/^\/api\/meetups\/([a-z0-9-]+)\/register$/);
     if (request.method === "POST" && registerMatch) {
       return handleRegister(request, env, registerMatch[1], corsOrigin);
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/sponsors") {
+      return handleSponsorRegister(request, env, corsOrigin);
     }
 
     return json({error: "Not found"}, 404, corsOrigin);

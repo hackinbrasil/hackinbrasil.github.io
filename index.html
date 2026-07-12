@@ -39,9 +39,9 @@ title: Hack in Brasil — Comunidade de Segurança da Informação
           Blog da comunidade
         </a>
         <span class="hero-actions-break" aria-hidden="true"></span>
-        <button class="btn btn-primary" id="openSponsorsModal">
+        <a class="btn btn-primary" href="{{ '/quero-patrocinar/' | relative_url }}">
           Quero patrocinar
-        </button>
+        </a>
         <button class="btn btn-ghost" id="openSpeakersModal">
           Submeter palestra
         </button>
@@ -269,13 +269,6 @@ title: Hack in Brasil — Comunidade de Segurança da Informação
       {% endfor %}
     </div>
   </section>
-
-  <div class="modal" id="sponsorsModal">
-    <div class="modal-content">
-      <button class="modal-close" data-close aria-label="Fechar">✕</button>
-      <iframe src="https://airtable.com/embed/appCzCiEo4s3EAtXo/pagjYVWy8HcfamDQW/form" frameborder="0"></iframe>
-    </div>
-  </div>
 
   <div class="modal" id="speakersModal">
     <div class="modal-content">
