@@ -1227,35 +1227,20 @@ footer a {
 .c4p-info-card {
   display: flex;
   flex-direction: column;
-  gap: 0.65rem;
-  padding: 1.3rem;
-  background: rgba(15, 26, 32, 0.88);
+  gap: 0.55rem;
+  padding: 1.2rem;
+  background: rgba(11, 20, 26, 0.75);
   border: 1px solid var(--border-soft);
-  border-radius: 14px;
-  box-shadow: var(--shadow-soft);
-  transition: border-color var(--transition-fast), transform var(--transition-fast);
+  border-radius: 12px;
 }
 
-.c4p-info-card:hover {
-  border-color: rgba(47, 195, 162, 0.45);
-  transform: translateY(-2px);
-}
-
-.c4p-info-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 42px;
-  height: 42px;
-  border-radius: 11px;
-  background: rgba(47, 195, 162, 0.1);
-  border: 1px solid rgba(47, 195, 162, 0.25);
-  font-size: 1.25rem;
-}
-
-.c4p-info-title {
-  font-size: 1.02rem;
+.c4p-info-eyebrow {
   margin: 0;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent-soft);
 }
 
 .c4p-info-card .c4p-list {
