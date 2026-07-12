@@ -2,6 +2,7 @@
 layout: speaker
 name: "Eduardo Argollo"
 photo: "/assets/images/past speakers/Eduardo_Argollo.jpg"
+linkedin: "https://www.linkedin.com/in/eduardoargollo/"
 meetups:
   - meetup-25-04-2026
 talks:

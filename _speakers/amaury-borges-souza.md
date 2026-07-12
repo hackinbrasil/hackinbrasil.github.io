@@ -3,6 +3,7 @@ layout: speaker
 name: "Amaury Borges Souza"
 photo: "/assets/images/past speakers/Amaury_Borges_jpg.jpg"
 role: "Senior Cloud Security Engineer • Professor de MBA na FIAP"
+linkedin: "https://www.linkedin.com/in/amaurybsouza/"
 meetups:
   - meetup-25-03-2026
 talks:

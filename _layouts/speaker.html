@@ -22,6 +22,11 @@ layout: default
     <p class="hero-kicker">Palestrante</p>
     <h1 class="meetup-title">{{ page.name }}</h1>
     {% if page.role %}<p class="speaker-role">{{ page.role }}</p>{% endif %}
+    {% if page.linkedin %}
+      <p class="meetup-subtitle">
+        <a class="meetup-map-link" href="{{ page.linkedin }}" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+      </p>
+    {% endif %}
     {% assign body = content | strip %}
     {% if body != "" %}
       <div class="blog-article-content">{{ content }}</div>

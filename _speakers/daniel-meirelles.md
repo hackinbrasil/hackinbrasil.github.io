@@ -2,6 +2,7 @@
 layout: speaker
 name: "Daniel Meirelles"
 photo: "/assets/images/past speakers/Daniel_Meirelles.jpg"
+linkedin: "https://www.linkedin.com/in/daniel-meirelles-/"
 meetups:
   - meetup-25-04-2026
 talks:

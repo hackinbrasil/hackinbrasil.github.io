@@ -1,9 +1,9 @@
 ---
 layout: entity
 entity_label: "Apoiador"
-name: "Comunidade parceira"
+name: "Rio CyberSec"
 logo: "/assets/images/sponsors/hacking-na-web-day.png"
-site: "https://avatars.githubusercontent.com/u/248527067?v=4"
+site: "http://riocybersec.com.br/"
 order: 4
 meetups: []
 ---

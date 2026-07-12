@@ -10,6 +10,14 @@ function json(data, status = 200, corsOrigin = "*") {
   });
 }
 
+// Logs the real cause to the Worker logs (server-side only) and returns a
+// generic message to the client, so backend state (missing tables, missing
+// secrets, etc.) is never disclosed in the response.
+function serverError(corsOrigin, context, error) {
+  console.error(`[${context}]`, error);
+  return json({error: "Erro interno. Tente novamente mais tarde."}, 500, corsOrigin);
+}
+
 function getCorsOrigin(request, env) {
   const allowedOrigins = String(env.ALLOWED_ORIGIN || "")
     .split(",")
@@ -45,8 +53,10 @@ function isValidEmail(email) {
   return true;
 }
 
+// Cap the raw input before the regex so an oversized body field can't turn into
+// a CPU amplifier. A CPF/phone is well under 32 chars.
 function normalizeDocument(document) {
-  return String(document || "").replace(/\D+/g, "");
+  return String(document || "").slice(0, 32).replace(/\D+/g, "");
 }
 
 function isValidCpf(document) {
@@ -68,7 +78,7 @@ function isValidCpf(document) {
 }
 
 function normalizePhone(phone) {
-  let digits = String(phone || "").replace(/\D+/g, "");
+  let digits = String(phone || "").slice(0, 32).replace(/\D+/g, "");
   if (digits.length === 13 && digits.startsWith("55")) digits = digits.slice(2);
   return digits;
 }
@@ -359,15 +369,7 @@ async function handleCaptchaIssue(env, corsOrigin) {
       .bind(id, answer)
       .run();
   } catch (err) {
-    const message = String(err?.message || err || "");
-    if (message.includes("no such table")) {
-      return json(
-        {error: "Database not initialized. Apply D1 migrations before using the API."},
-        500,
-        corsOrigin
-      );
-    }
-    return json({error: "Não foi possível gerar a verificação"}, 500, corsOrigin);
+    return serverError(corsOrigin, "captcha:issue", err);
   }
 
   return json({id, question}, 200, corsOrigin);
@@ -405,12 +407,8 @@ async function handleStatus(env, slug, corsOrigin) {
   let meetup;
   try {
     meetup = await getMeetupBySlug(env.DB, slug);
-  } catch {
-    return json(
-      {error: "Database not initialized. Apply D1 migrations before using the API."},
-      500,
-      corsOrigin
-    );
+  } catch (err) {
+    return serverError(corsOrigin, "getMeetup", err);
   }
 
   if (!meetup) return json({error: "Meetup not found"}, 404, corsOrigin);
@@ -446,7 +444,7 @@ async function handleRegister(request, env, slug, corsOrigin) {
   const captchaId = String(body.captchaId || "");
   const captchaValue = Number(body.captcha);
 
-  if (!name || name.length < 3) {
+  if (!name || name.length < 3 || name.length > 200) {
     return json({error: "Nome inválido"}, 400, corsOrigin);
   }
   if (!isValidEmail(email)) {
@@ -468,12 +466,8 @@ async function handleRegister(request, env, slug, corsOrigin) {
   let meetup;
   try {
     meetup = await getMeetupBySlug(env.DB, slug);
-  } catch {
-    return json(
-      {error: "Database not initialized. Apply D1 migrations before using the API."},
-      500,
-      corsOrigin
-    );
+  } catch (err) {
+    return serverError(corsOrigin, "getMeetup", err);
   }
 
   if (!meetup) return json({error: "Meetup not found"}, 404, corsOrigin);
@@ -698,15 +692,7 @@ async function handleSponsorRegister(request, env, corsOrigin) {
       .bind(company, website || null, contactName, role || null, email, phone, message || null)
       .run();
   } catch (err) {
-    const dbMessage = String(err?.message || err || "");
-    if (dbMessage.includes("no such table")) {
-      return json(
-        {error: "Database not initialized. Apply D1 migrations before using the API."},
-        500,
-        corsOrigin
-      );
-    }
-    return json({error: "Falha ao registrar solicitação de patrocínio"}, 500, corsOrigin);
+    return serverError(corsOrigin, "sponsors:insert", err);
   }
 
   const notify = buildSponsorNotificationEmail({
@@ -868,15 +854,7 @@ async function handleTalkSubmit(request, env, corsOrigin) {
       )
       .run();
   } catch (err) {
-    const dbMessage = String(err?.message || err || "");
-    if (dbMessage.includes("no such table")) {
-      return json(
-        {error: "Database not initialized. Apply D1 migrations before using the API."},
-        500,
-        corsOrigin
-      );
-    }
-    return json({error: "Falha ao registrar proposta de palestra"}, 500, corsOrigin);
+    return serverError(corsOrigin, "talks:insert", err);
   }
 
   const notify = buildTalkNotificationEmail({
@@ -923,42 +901,50 @@ async function handleTalkSubmit(request, env, corsOrigin) {
 export default {
   async fetch(request, env) {
     const corsOrigin = getCorsOrigin(request, env);
-    const url = new URL(request.url);
 
-    if (request.method === "OPTIONS") {
-      return new Response(null, {
-        status: 204,
-        headers: {
-          "access-control-allow-origin": corsOrigin,
-          "access-control-allow-methods": "GET,POST,OPTIONS",
-          "access-control-allow-headers": "content-type,authorization"
-        }
-      });
+    // Safety net: any unexpected throw (missing secret, unforeseen DB error,
+    // etc.) becomes a uniform generic 500 with the detail logged server-side,
+    // instead of a raw Cloudflare error page.
+    try {
+      const url = new URL(request.url);
+
+      if (request.method === "OPTIONS") {
+        return new Response(null, {
+          status: 204,
+          headers: {
+            "access-control-allow-origin": corsOrigin,
+            "access-control-allow-methods": "GET,POST,OPTIONS",
+            "access-control-allow-headers": "content-type,authorization"
+          }
+        });
+      }
+
+      const statusMatch = url.pathname.match(/^\/api\/meetups\/([a-z0-9-]+)\/status$/);
+      if (request.method === "GET" && statusMatch) {
+        return handleStatus(env, statusMatch[1], corsOrigin);
+      }
+
+      if (request.method === "GET" && url.pathname === "/api/captcha") {
+        return handleCaptchaIssue(env, corsOrigin);
+      }
+
+      const registerMatch = url.pathname.match(/^\/api\/meetups\/([a-z0-9-]+)\/register$/);
+      if (request.method === "POST" && registerMatch) {
+        return handleRegister(request, env, registerMatch[1], corsOrigin);
+      }
+
+      if (request.method === "POST" && url.pathname === "/api/sponsors") {
+        return handleSponsorRegister(request, env, corsOrigin);
+      }
+
+      if (request.method === "POST" && url.pathname === "/api/talks") {
+        return handleTalkSubmit(request, env, corsOrigin);
+      }
+
+      return json({error: "Not found"}, 404, corsOrigin);
+    } catch (err) {
+      return serverError(corsOrigin, "fetch", err);
     }
-
-    const statusMatch = url.pathname.match(/^\/api\/meetups\/([a-z0-9-]+)\/status$/);
-    if (request.method === "GET" && statusMatch) {
-      return handleStatus(env, statusMatch[1], corsOrigin);
-    }
-
-    if (request.method === "GET" && url.pathname === "/api/captcha") {
-      return handleCaptchaIssue(env, corsOrigin);
-    }
-
-    const registerMatch = url.pathname.match(/^\/api\/meetups\/([a-z0-9-]+)\/register$/);
-    if (request.method === "POST" && registerMatch) {
-      return handleRegister(request, env, registerMatch[1], corsOrigin);
-    }
-
-    if (request.method === "POST" && url.pathname === "/api/sponsors") {
-      return handleSponsorRegister(request, env, corsOrigin);
-    }
-
-    if (request.method === "POST" && url.pathname === "/api/talks") {
-      return handleTalkSubmit(request, env, corsOrigin);
-    }
-
-    return json({error: "Not found"}, 404, corsOrigin);
   },
 
   async scheduled(_event, env, ctx) {

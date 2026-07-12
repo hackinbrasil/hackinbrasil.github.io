@@ -3,6 +3,7 @@ layout: speaker
 name: "Mariana Gonçalves"
 photo: "/assets/images/past speakers/Mariana_Gonçalves.jpg"
 role: "Mestranda na UFRJ"
+linkedin: "https://www.linkedin.com/in/mariana-gdacosta/"
 meetups:
   - meetup-25-03-2026
 talks:
