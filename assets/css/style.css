@@ -885,10 +885,12 @@ footer a {
   background: rgba(5, 10, 14, 0.55);
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 10px;
-  padding: 0.8rem;
+  padding: 1.1rem 0.9rem;
   height: 100%;
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  text-align: center;
 }
 
 .talk-speaker img {
@@ -1740,7 +1742,8 @@ footer a {
   border-radius: 50%;
   object-fit: cover;
   border: 3px solid var(--border-soft);
-  margin-bottom: 1.2rem;
+  display: block;
+  margin: 0 auto 1.2rem;
 }
 
 .entity-meetup-list {

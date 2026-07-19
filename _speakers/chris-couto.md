@@ -2,7 +2,7 @@
 layout: speaker
 name: "Chris Couto"
 photo: "/assets/images/past speakers/Chris_Couto.jpg"
-role: "Professora de Segurança Cibernética (Infnet) · Doutoranda em Engenharia de Defesa (IME)"
+role: "Servidora pública no INPI (Instituto Nacional da Propriedade Industrial) · Professora de Segurança Cibernética (Infnet) · Doutoranda em Engenharia de Defesa (IME)"
 linkedin: "https://www.linkedin.com/in/chris-couto"
 talks:
   - title: "Principais defesas contra ataques ciberfísicos em subestações elétricas"
