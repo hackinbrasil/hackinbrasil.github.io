@@ -48,7 +48,6 @@
     return;
   }
 
-  // Phone is optional here.
   function setPhoneErrorState(isInvalid) {
     if (!phoneInput) return;
     phoneInput.classList.toggle("is-invalid", isInvalid);
@@ -134,7 +133,6 @@
 
       if (!res.ok) {
         feedback.show(data.error || "Não foi possível enviar a proposta.", "error");
-        // The challenge is single-use and now spent — fetch a fresh one to retry.
         captcha.render();
         submit.disabled = false;
         submit.textContent = "Enviar proposta";

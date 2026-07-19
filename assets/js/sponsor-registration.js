@@ -110,7 +110,6 @@
 
       if (!res.ok) {
         feedback.show(data.error || "Não foi possível enviar a solicitação.", "error");
-        // The challenge is single-use and now spent — fetch a fresh one to retry.
         captcha.render();
         submit.disabled = false;
         submit.textContent = "Enviar solicitação";

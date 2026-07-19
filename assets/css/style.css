@@ -1029,9 +1029,6 @@ footer a {
   font-family: 'DM Mono', monospace;
 }
 
-/* Visible required-field marker. The native `required` attribute stays on the
-   inputs (announced by assistive tech); this asterisk is the sighted cue that
-   distinguishes required from optional fields. */
 .registration-field:has(> input[required], > textarea[required], > select[required]) > label::after,
 .registration-fieldset:has(input[required]) > legend::after {
   content: " *";
@@ -1717,7 +1714,6 @@ footer a {
   }
 }
 
-/* Dedicated pages: sponsors, supporters, speakers */
 .entity-logo {
   display: flex;
   align-items: center;
@@ -1765,14 +1761,12 @@ footer a {
   text-decoration: underline;
 }
 
-/* Related speakers on a meetup page */
 .edition-speakers {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
 }
 
-/* Meetup photos & videos gallery */
 .meetup-gallery {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));

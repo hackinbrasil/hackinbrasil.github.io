@@ -10,12 +10,35 @@ function json(data, status = 200, corsOrigin = "*") {
   });
 }
 
-// Logs the real cause to the Worker logs (server-side only) and returns a
-// generic message to the client, so backend state (missing tables, missing
-// secrets, etc.) is never disclosed in the response.
 function serverError(corsOrigin, context, error) {
   console.error(`[${context}]`, error);
   return json({error: "Erro interno. Tente novamente mais tarde."}, 500, corsOrigin);
+}
+
+const MAX_BODY_BYTES = 32 * 1024;
+
+async function readJsonBody(request, corsOrigin) {
+  const declaredLength = Number(request.headers.get("content-length") || 0);
+  if (Number.isFinite(declaredLength) && declaredLength > MAX_BODY_BYTES) {
+    return {error: json({error: "Payload muito grande"}, 413, corsOrigin)};
+  }
+
+  let raw;
+  try {
+    raw = await request.text();
+  } catch {
+    return {error: json({error: "Invalid JSON body"}, 400, corsOrigin)};
+  }
+
+  if (raw.length > MAX_BODY_BYTES) {
+    return {error: json({error: "Payload muito grande"}, 413, corsOrigin)};
+  }
+
+  try {
+    return {body: JSON.parse(raw)};
+  } catch {
+    return {error: json({error: "Invalid JSON body"}, 400, corsOrigin)};
+  }
 }
 
 function getCorsOrigin(request, env) {
@@ -53,8 +76,6 @@ function isValidEmail(email) {
   return true;
 }
 
-// Cap the raw input before the regex so an oversized body field can't turn into
-// a CPU amplifier. A CPF/phone is well under 32 chars.
 function normalizeDocument(document) {
   return String(document || "").slice(0, 32).replace(/\D+/g, "");
 }
@@ -83,14 +104,10 @@ function normalizePhone(phone) {
   return digits;
 }
 
-// Brazilian mobile: DDD (2 digits, no leading zero) + 9 + 8 digits.
 function isValidBrazilMobile(nationalDigits) {
   return /^[1-9][1-9]9\d{8}$/.test(nationalDigits);
 }
 
-// Contact phone for sponsors is more permissive than an attendee mobile: it
-// accepts both mobiles (11 digits) and landlines (10 digits), since a company
-// may give either. DDD must not start with 0.
 function isValidBrazilContactPhone(nationalDigits) {
   return /^[1-9][1-9]\d{8,9}$/.test(nationalDigits);
 }
@@ -124,13 +141,6 @@ async function getMeetupBySlug(db, slug) {
   return db
     .prepare("SELECT slug, title, event_date, capacity, registrations_count, is_open FROM meetups WHERE slug = ?")
     .bind(slug)
-    .first();
-}
-
-async function getRegistrationByMeetupAndEmail(db, slug, email) {
-  return db
-    .prepare("SELECT id, document_encrypted FROM registrations WHERE meetup_slug = ? AND email = ?")
-    .bind(slug, email)
     .first();
 }
 
@@ -188,6 +198,69 @@ async function decryptField(encryptedPayload, env) {
   return new TextDecoder().decode(plainBuffer);
 }
 
+async function importHmacKey(env) {
+  if (!env.DOC_ENCRYPTION_KEY_BASE64) {
+    throw new Error("DOC_ENCRYPTION_KEY_BASE64 secret is required");
+  }
+  const raw = base64ToBytes(env.DOC_ENCRYPTION_KEY_BASE64);
+  if (raw.byteLength !== 32) {
+    throw new Error("DOC_ENCRYPTION_KEY_BASE64 must decode to 32 bytes");
+  }
+  return crypto.subtle.importKey("raw", raw, {name: "HMAC", hash: "SHA-256"}, false, ["sign"]);
+}
+
+async function blindIndex(label, value, env) {
+  const key = await importHmacKey(env);
+  const message = new TextEncoder().encode(`${label}:${value}`);
+  const signature = await crypto.subtle.sign("HMAC", key, message);
+  return bytesToBase64(new Uint8Array(signature));
+}
+
+const DISPOSABLE_EMAIL_DOMAINS = new Set([
+  "mailinator.com",
+  "guerrillamail.com",
+  "guerrillamail.info",
+  "sharklasers.com",
+  "grr.la",
+  "10minutemail.com",
+  "10minutemail.net",
+  "tempmail.com",
+  "temp-mail.org",
+  "tempmail.net",
+  "tempmailo.com",
+  "yopmail.com",
+  "yopmail.net",
+  "throwawaymail.com",
+  "getnada.com",
+  "nada.email",
+  "dispostable.com",
+  "trashmail.com",
+  "trashmail.de",
+  "fakeinbox.com",
+  "maildrop.cc",
+  "mailnesia.com",
+  "mohmal.com",
+  "moakt.com",
+  "emailondeck.com",
+  "mailcatch.com",
+  "spam4.me",
+  "tmail.ws",
+  "burnermail.io",
+  "mytemp.email",
+  "tempmailaddress.com"
+]);
+
+function isDisposableEmail(email) {
+  const atIndex = String(email || "").lastIndexOf("@");
+  if (atIndex < 0) return false;
+  const domain = email.slice(atIndex + 1).toLowerCase();
+  if (DISPOSABLE_EMAIL_DOMAINS.has(domain)) return true;
+  for (const blocked of DISPOSABLE_EMAIL_DOMAINS) {
+    if (domain.endsWith(`.${blocked}`)) return true;
+  }
+  return false;
+}
+
 async function queueConfirmationEmail(env, payload) {
   await env.DB
     .prepare(
@@ -207,9 +280,6 @@ async function queueConfirmationEmail(env, payload) {
     .run();
 }
 
-// Collapse CR/LF and other control characters so attacker-influenced values
-// (subject built from company/talk title, reply-to from the submitter's email)
-// can't smuggle line breaks into header-like fields.
 function sanitizeHeaderValue(value) {
   return String(value == null ? "" : value)
     .replace(/[\u0000-\u001F\u007F]+/g, " ")
@@ -283,14 +353,34 @@ async function markEmailAsFailed(env, jobId, errorText) {
     .run();
 }
 
+const DAILY_EMAIL_CAP = 100;
+const MAX_CAP_RETRIES = 3;
+
+async function deferJobsOverDailyCap(env) {
+  await env.DB
+    .prepare(
+      "UPDATE email_jobs SET send_after = datetime('now', '+12 hours'), cap_retries = cap_retries + 1, updated_at = CURRENT_TIMESTAMP, last_error = 'Limite diário de e-mails atingido; reagendado' WHERE status = 'pending' AND send_after <= CURRENT_TIMESTAMP AND cap_retries < ?"
+    )
+    .bind(MAX_CAP_RETRIES)
+    .run();
+
+  await env.DB
+    .prepare(
+      "UPDATE email_jobs SET status = 'failed', updated_at = CURRENT_TIMESTAMP, last_error = 'Limite diário de e-mails atingido após 3 reagendamentos' WHERE status = 'pending' AND send_after <= CURRENT_TIMESTAMP AND cap_retries >= ?"
+    )
+    .bind(MAX_CAP_RETRIES)
+    .run();
+}
+
 async function processPendingEmailJobs(env, limit = 20) {
   const sentTodayRow = await env.DB
     .prepare("SELECT COUNT(*) AS total FROM email_jobs WHERE status = 'sent' AND date(sent_at) = date('now')")
     .first();
 
   const sentToday = Number(sentTodayRow?.total || 0);
-  const remainingForToday = 100 - sentToday;
+  const remainingForToday = DAILY_EMAIL_CAP - sentToday;
   if (remainingForToday <= 0) {
+    await deferJobsOverDailyCap(env);
     return;
   }
 
@@ -339,8 +429,6 @@ function randomInt(maxExclusive) {
   return buf[0] % maxExclusive;
 }
 
-// Builds a small arithmetic challenge. The answer stays server-side; only the
-// question string is shown to the user.
 function generateCaptchaChallenge() {
   const a = randomInt(9) + 1;
   const b = randomInt(9) + 1;
@@ -375,9 +463,6 @@ async function handleCaptchaIssue(env, corsOrigin) {
   return json({id, question}, 200, corsOrigin);
 }
 
-// Verifies and consumes a challenge. The consuming UPDATE is atomic, so a
-// challenge can be used at most once — a correct answer, a wrong answer, an
-// expired token or a reused token all resolve to a single attempt.
 async function consumeCaptcha(env, id, answer) {
   if (typeof id !== "string" || !id || !Number.isFinite(answer)) return false;
 
@@ -428,12 +513,9 @@ async function handleStatus(env, slug, corsOrigin) {
 }
 
 async function handleRegister(request, env, slug, corsOrigin) {
-  let body;
-  try {
-    body = await request.json();
-  } catch {
-    return json({error: "Invalid JSON body"}, 400, corsOrigin);
-  }
+  const parsed = await readJsonBody(request, corsOrigin);
+  if (parsed.error) return parsed.error;
+  const body = parsed.body;
 
   const name = String(body.name || "").trim();
   const email = String(body.email || "").trim().toLowerCase();
@@ -449,6 +531,9 @@ async function handleRegister(request, env, slug, corsOrigin) {
   }
   if (!isValidEmail(email)) {
     return json({error: "E-mail inválido"}, 400, corsOrigin);
+  }
+  if (isDisposableEmail(email)) {
+    return json({error: "Use um e-mail permanente. E-mails temporários/descartáveis não são aceitos."}, 400, corsOrigin);
   }
   if (!isValidCpf(document)) {
     return json({error: "CPF inválido"}, 400, corsOrigin);
@@ -483,21 +568,17 @@ async function handleRegister(request, env, slug, corsOrigin) {
   const encryptedDocument = await encryptField(document, env);
   const encryptedPhone = await encryptField(phone, env);
   const documentLast4 = document.slice(-4);
+  const documentHash = await blindIndex("document", document, env);
+  const phoneHash = await blindIndex("phone", phoneNational, env);
 
-  // Claim a seat and insert the registration in a single atomic transaction, so a
-  // crash between the two can no longer leave the count incremented without a
-  // matching registration (undersell) or vice versa. Both statements are gated on
-  // capacity within the same transaction, so they either both apply (a seat was
-  // free) or both no-op (full). A failed batch rolls back entirely, so no manual
-  // decrement is needed on error.
   let batchResults;
   try {
     batchResults = await env.DB.batch([
       env.DB
         .prepare(
-          "INSERT INTO registrations (meetup_slug, name, email, phone_encrypted, document_encrypted, document_last4, consent_lgpd) SELECT ?, ?, ?, ?, ?, ?, 1 FROM meetups WHERE slug = ? AND is_open = 1 AND registrations_count < capacity"
+          "INSERT INTO registrations (meetup_slug, name, email, phone_encrypted, document_encrypted, document_last4, document_hash, phone_hash, consent_lgpd) SELECT ?, ?, ?, ?, ?, ?, ?, ?, 1 FROM meetups WHERE slug = ? AND is_open = 1 AND registrations_count < capacity"
         )
-        .bind(slug, name, email, encryptedPhone, encryptedDocument, documentLast4, slug),
+        .bind(slug, name, email, encryptedPhone, encryptedDocument, documentLast4, documentHash, phoneHash, slug),
       env.DB
         .prepare(
           "UPDATE meetups SET registrations_count = registrations_count + 1, updated_at = CURRENT_TIMESTAMP WHERE slug = ? AND is_open = 1 AND registrations_count < capacity"
@@ -507,33 +588,23 @@ async function handleRegister(request, env, slug, corsOrigin) {
   } catch (err) {
     const message = String(err?.message || err || "");
 
-    if (message.includes("UNIQUE constraint failed: registrations.meetup_slug, registrations.email")) {
+    if (message.includes("UNIQUE constraint failed")) {
+      let isFull = false;
       try {
-        const existingRegistration = await getRegistrationByMeetupAndEmail(env.DB, slug, email);
-        if (existingRegistration) {
-          const existingDocument = await decryptField(
-            String(existingRegistration.document_encrypted),
-            env
-          );
-          if (normalizeDocument(existingDocument) === document) {
-            const updated = await getMeetupBySlug(env.DB, slug);
-            const isFull = updated.registrations_count >= updated.capacity || updated.is_open !== 1;
-            return json(
-              {
-                ok: true,
-                message: "Inscrição realizada com sucesso",
-                emailScheduled: false,
-                isFull
-              },
-              201,
-              corsOrigin
-            );
-          }
-        }
+        const current = await getMeetupBySlug(env.DB, slug);
+        isFull = current.registrations_count >= current.capacity || current.is_open !== 1;
       } catch {
-        return json({error: "Não foi possível concluir a inscrição"}, 409, corsOrigin);
+        isFull = false;
       }
-      return json({error: "Não foi possível concluir a inscrição"}, 409, corsOrigin);
+      return json(
+        {
+          ok: true,
+          message: "Inscrição realizada com sucesso",
+          isFull
+        },
+        201,
+        corsOrigin
+      );
     }
     return json({error: "Falha ao registrar inscrição"}, 500, corsOrigin);
   }
@@ -541,7 +612,6 @@ async function handleRegister(request, env, slug, corsOrigin) {
   const insertResult = batchResults[0];
   const updateResult = batchResults[1];
 
-  // No seat was free: both gated statements matched no rows and nothing was written.
   if (
     !insertResult?.meta ||
     insertResult.meta.changes !== 1 ||
@@ -564,7 +634,6 @@ async function handleRegister(request, env, slug, corsOrigin) {
     registrationId = Number(createdRegistration?.id || 0);
   }
 
-  let emailScheduled = false;
   try {
     const emailTemplate = await getEmailTemplateByMeetupSlug(env.DB, slug);
     if (emailTemplate && registrationId) {
@@ -579,10 +648,8 @@ async function handleRegister(request, env, slug, corsOrigin) {
         text: String(emailTemplate.text_body),
         delayMinutes: 10
       });
-      emailScheduled = true;
     }
   } catch {
-    emailScheduled = false;
   }
 
   const updated = await getMeetupBySlug(env.DB, slug);
@@ -592,7 +659,6 @@ async function handleRegister(request, env, slug, corsOrigin) {
     {
       ok: true,
       message: "Inscrição realizada com sucesso",
-      emailScheduled,
       isFull
     },
     201,
@@ -638,12 +704,9 @@ function buildSponsorNotificationEmail(data) {
 }
 
 async function handleSponsorRegister(request, env, corsOrigin) {
-  let body;
-  try {
-    body = await request.json();
-  } catch {
-    return json({error: "Invalid JSON body"}, 400, corsOrigin);
-  }
+  const parsed = await readJsonBody(request, corsOrigin);
+  if (parsed.error) return parsed.error;
+  const body = parsed.body;
 
   const company = String(body.company || "").trim();
   const website = String(body.website || "").trim();
@@ -718,7 +781,6 @@ async function handleSponsorRegister(request, env, corsOrigin) {
     });
     emailSent = true;
   } catch {
-    // The lead is already stored; a failed notification must not fail the request.
     emailSent = false;
   }
 
@@ -774,12 +836,9 @@ function buildTalkNotificationEmail(data) {
 }
 
 async function handleTalkSubmit(request, env, corsOrigin) {
-  let body;
-  try {
-    body = await request.json();
-  } catch {
-    return json({error: "Invalid JSON body"}, 400, corsOrigin);
-  }
+  const parsed = await readJsonBody(request, corsOrigin);
+  if (parsed.error) return parsed.error;
+  const body = parsed.body;
 
   const title = String(body.title || "").trim();
   const abstract = String(body.abstract || "").trim();
@@ -883,7 +942,6 @@ async function handleTalkSubmit(request, env, corsOrigin) {
     });
     emailSent = true;
   } catch {
-    // The proposal is already stored; a failed notification must not fail the request.
     emailSent = false;
   }
 
@@ -902,9 +960,6 @@ export default {
   async fetch(request, env) {
     const corsOrigin = getCorsOrigin(request, env);
 
-    // Safety net: any unexpected throw (missing secret, unforeseen DB error,
-    // etc.) becomes a uniform generic 500 with the detail logged server-side,
-    // instead of a raw Cloudflare error page.
     try {
       const url = new URL(request.url);
 
@@ -956,7 +1011,6 @@ export default {
             .prepare("DELETE FROM captcha_challenges WHERE expires_at < CURRENT_TIMESTAMP")
             .run();
         } catch {
-          // Best-effort cleanup; ignore (e.g. table not yet migrated).
         }
       })()
     );

@@ -1,0 +1,1 @@
+ALTER TABLE email_jobs ADD COLUMN cap_retries INTEGER NOT NULL DEFAULT 0;

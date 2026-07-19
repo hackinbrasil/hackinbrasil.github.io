@@ -26,8 +26,6 @@
   });
   const captcha = F.createCaptcha(captchaQuestion, captchaInput, apiBase);
 
-  // Hide the registration section once the meetup date has passed.
-  // An empty/invalid date means the meetup is still upcoming, so we keep showing it.
   function isMeetupPast() {
     if (!meetupDate) return false;
     const endOfMeetupDay = new Date(`${meetupDate}T23:59:59`);
@@ -76,10 +74,6 @@
     return;
   }
 
-  // Every field the registration flow depends on must be present in the form before we let
-  // anyone submit. The API now requires all of them (phone included), so a page cloned
-  // without one would otherwise submit incomplete data and be rejected with a confusing
-  // error the user can't fix — fail loudly here instead of silently.
   const requiredControls = {
     "nome": form.querySelector('[name="name"]'),
     "e-mail": form.querySelector('[name="email"]'),
@@ -144,9 +138,11 @@
   function setClosedState(message) {
     status.textContent = message;
     submit.disabled = true;
-    submit.textContent = "Inscrições encerradas";
-    feedback.show("Novos ingressos serão liberados em breve", "error");
+    submit.textContent = "Aguardando próximo lote";
   }
+
+  const BATCH_RELEASE_MESSAGE =
+    "As vagas deste lote se esgotaram. Novas inscrições serão liberadas em breve — abrimos as vagas em lotes, então fique de olho por aqui e nas nossas redes.";
 
   async function refreshStatus() {
     try {
@@ -161,7 +157,7 @@
       }
 
       if (data.isFull) {
-        setClosedState("Inscrições encerradas para este meetup.");
+        setClosedState(BATCH_RELEASE_MESSAGE);
         return;
       }
 
@@ -228,15 +224,15 @@
 
       if (!res.ok) {
         const errorMessage = data.error || "Não foi possível concluir a inscrição.";
-        feedback.show(errorMessage, "error");
         if (res.status === 409) {
           const isCapacityError = /inscriç(ã|a)es encerradas/i.test(errorMessage);
           if (isCapacityError) {
-            setClosedState("Inscrições encerradas para este meetup.");
+            feedback.show(BATCH_RELEASE_MESSAGE, "error");
+            setClosedState(BATCH_RELEASE_MESSAGE);
             return;
           }
         }
-        // The challenge is single-use and may now be spent — fetch a fresh one.
+        feedback.show(errorMessage, "error");
         captcha.render();
         submit.disabled = false;
         submit.textContent = "Inscrever-se";
@@ -250,7 +246,7 @@
       captcha.render();
 
       if (data.isFull) {
-        setClosedState("Inscrições encerradas. Limite de participantes atingido.");
+        setClosedState("Sua inscrição foi confirmada! Com ela, as vagas deste lote se esgotaram. Novas inscrições serão liberadas em breve, em novos lotes.");
       } else {
         await refreshStatus();
       }

@@ -1,12 +1,8 @@
-// Shared helpers for the registration/sponsor/talk forms. Loaded before each
-// page's form script and exposed on window.HIBForms.
 window.HIBForms = (function () {
   function onlyDigits(value) {
     return String(value || "").replace(/\D+/g, "");
   }
 
-  // Brazilian phone: national number is DDD (2 digits) + (mobile 9 + 8 digits,
-  // or landline 8 digits). Country code +55 is fixed and added on submit.
   function normalizePhone(value) {
     let digits = onlyDigits(value);
     if (digits.length === 13 && digits.startsWith("55")) digits = digits.slice(2);
@@ -20,12 +16,10 @@ window.HIBForms = (function () {
     return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
   }
 
-  // Mobile only: DDD + 9 + 8 digits.
   function isBrazilMobile(value) {
     return /^[1-9][1-9]9\d{8}$/.test(normalizePhone(value));
   }
 
-  // Mobile (11 digits) or landline (10 digits) — for contact fields.
   function isBrazilContactPhone(value) {
     return /^[1-9][1-9]\d{8,9}$/.test(normalizePhone(value));
   }
@@ -56,9 +50,6 @@ window.HIBForms = (function () {
     return secondDigit === Number(cpf[10]);
   }
 
-  // Server-issued arithmetic anti-bot challenge. The question is fetched from the
-  // backend and the answer is verified server-side (single-use), so the token is
-  // sent with the form and validated there — the client never knows the answer.
   function createCaptcha(questionEl, inputEl, apiBase) {
     const base = String(apiBase || "").replace(/\/$/, "");
     let token = null;
@@ -87,8 +78,6 @@ window.HIBForms = (function () {
       return inputEl ? inputEl.value.trim() : "";
     }
 
-    // A challenge is ready to submit once we have a token and the user typed an
-    // answer. The answer itself is only judged by the backend.
     function ready() {
       return !!token && getAnswer() !== "";
     }
@@ -96,7 +85,6 @@ window.HIBForms = (function () {
     return { render, getToken, getAnswer, ready };
   }
 
-  // Feedback modal controller. `titles` = { success, error }.
   function createFeedback(modalEl, titleEl, messageEl, titles) {
     function show(message, type) {
       titleEl.textContent = type === "success" ? titles.success : titles.error;

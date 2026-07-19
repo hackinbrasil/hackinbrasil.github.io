@@ -1,10 +1,3 @@
--- Queue reminder email only for attendees registered in meetup-25-04-2026.
--- This does not affect registrations from other meetups.
--- Important: keep previous email job history untouched.
---
--- The original schema had UNIQUE(registration_id), allowing only one email job
--- per registration. For reminders, we need a second job row without rewriting
--- confirmation history, so we rebuild the table without that unique constraint.
 
 DROP TABLE IF EXISTS email_jobs_new;
 

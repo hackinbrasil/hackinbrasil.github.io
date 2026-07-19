@@ -75,9 +75,7 @@ A experiência da Vantico reforça uma leitura importante para o mercado: patroc
 ## Fotos
 
 <div class="blog-photo-gallery">
-  <img class="blog-event-photo" src="{{ '/assets/images/vantico photos/IMG_6107.HEIC' | relative_url }}" alt="Foto da parceria da Vantico com o Hack in Brasil">
-  <img class="blog-event-photo" src="{{ '/assets/images/vantico photos/IMG_6198.HEIC' | relative_url }}" alt="Foto do evento com a Vantico">
-  <img class="blog-event-photo" src="{{ '/assets/images/vantico photos/IMG_6203.HEIC' | relative_url }}" alt="Participantes no evento apoiado pela Vantico">
-  <img class="blog-event-photo" src="{{ '/assets/images/vantico photos/IMG_6222.HEIC' | relative_url }}" alt="Registro do encontro com a Vantico">
+  <img class="blog-event-photo" src="{{ '/assets/images/vantico photos/IMG_6107.jpg' | relative_url }}" alt="Foto da parceria da Vantico com o Hack in Brasil">
+  <img class="blog-event-photo" src="{{ '/assets/images/vantico photos/IMG_6222.jpg' | relative_url }}" alt="Registro do encontro com a Vantico">
 </div>
 <script async src="https://www.instagram.com/embed.js"></script>
