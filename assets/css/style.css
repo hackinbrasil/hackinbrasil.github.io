@@ -931,6 +931,12 @@ footer a {
   margin-bottom: 0;
 }
 
+.talk-speaker-person p {
+  font-size: 0.78rem;
+  line-height: 1.35;
+  margin-top: 0.3rem;
+}
+
 .talk-content h3:empty,
 .talk-content p:empty,
 .talk-speaker h4:empty,

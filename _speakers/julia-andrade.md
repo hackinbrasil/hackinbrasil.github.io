@@ -2,6 +2,7 @@
 layout: speaker
 name: "Julia Andrade"
 photo: "/assets/images/past speakers/Julia_Andrade.jpg"
+role: "Estudante de Iniciação Científica"
 linkedin: "https://www.linkedin.com/in/julia-andrade-0b5a75366/"
 talks:
   - title: "Principais defesas contra ataques ciberfísicos em subestações elétricas"
