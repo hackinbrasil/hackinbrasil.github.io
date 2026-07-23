@@ -23,12 +23,12 @@ permalink: /meetup-03-09-2026/
     <p class="meetup-subtitle">
       Encontro da comunidade para compartilhar experiências e conhecimento em segurança da informação.
     </p>
-    <p class="speaker-role">Horário: 18h50 às 22h05</p>
+    <p class="speaker-role">Horário: 18h50 às 21h50</p>
   </section>
 
   <section class="meetup-card">
     <h2>Agenda e Palestrantes</h2>
-    <p class="meetup-subtitle">Início às 18h50 e encerramento às 22h05.</p>
+    <p class="meetup-subtitle">Início às 18h50 e encerramento às 21h50.</p>
     <div class="talks-grid">
       <article class="talk-card">
         <p class="talk-time">18:50</p>
@@ -45,16 +45,16 @@ permalink: /meetup-03-09-2026/
           </div>
           <aside class="talk-speaker">
             <div class="talk-speaker-list">
-              <div class="talk-speaker-person">
+              <a class="talk-speaker-person talk-speaker-link" href="{{ '/palestrantes/chris-couto/' | relative_url }}" aria-label="Ver perfil de Chris Couto">
                 <img src="{{ '/assets/images/past speakers/Chris_Couto.jpg' | replace: ' ', '%20' | relative_url }}" alt="Foto de Chris Couto">
                 <h4>Chris Couto</h4>
                 <p>Servidora pública no INPI, professora (Infnet) e doutoranda (IME).</p>
-              </div>
-              <div class="talk-speaker-person">
+              </a>
+              <a class="talk-speaker-person talk-speaker-link" href="{{ '/palestrantes/julia-andrade/' | relative_url }}" aria-label="Ver perfil de Julia Andrade">
                 <img src="{{ '/assets/images/past speakers/Julia_Andrade.jpg' | replace: ' ', '%20' | relative_url }}" alt="Foto de Julia Andrade">
                 <h4>Julia Andrade</h4>
                 <p>Estudante de Iniciação Científica.</p>
-              </div>
+              </a>
             </div>
           </aside>
         </div>
@@ -74,9 +74,11 @@ permalink: /meetup-03-09-2026/
             <p>Computadores quânticos ainda não quebram RSA, mas adversários já capturam tráfego cifrado hoje para decifrar no futuro, a estratégia "harvest now, decrypt later". Nesta palestra, Ney López apresenta uma jornada experimental de migração para criptografia pós-quântica: dissecação do handshake do TLS 1.3 com capturas reais de tráfego, montagem de uma PKI local com certificados digitais e validação de um handshake híbrido combinando algoritmos clássicos com ML-KEM (padrão NIST), utilizando OpenSSL 3.x e OQS Provider. Tudo com ferramentas open-source que podem ser reproduzidas em casa. O público vai sair entendendo por que a transição pós-quântica já começou, como funciona um handshake híbrido na prática e por onde começar a mapear as dependências criptográficas dos seus sistemas (crypto-agility).</p>
           </div>
           <aside class="talk-speaker">
-            <img src="{{ '/assets/images/past speakers/Ney_Lopez.jpg' | replace: ' ', '%20' | relative_url }}" alt="Foto de Ney López">
-            <h4>Ney López</h4>
-            <p class="speaker-role">Pesquisador em criptografia pós-quântica no SENAI CIMATEC e Diretor de Consultoria em Cibersegurança na Century Data.</p>
+            <a class="talk-speaker-link" href="{{ '/palestrantes/ney-lopez/' | relative_url }}" aria-label="Ver perfil de Ney López">
+              <img src="{{ '/assets/images/past speakers/Ney_Lopez.jpg' | replace: ' ', '%20' | relative_url }}" alt="Foto de Ney López">
+              <h4>Ney López</h4>
+              <p class="speaker-role">Pesquisador em criptografia pós-quântica no SENAI CIMATEC e Diretor de Consultoria em Cibersegurança na Century Data.</p>
+            </a>
           </aside>
         </div>
       </article>
@@ -104,7 +106,7 @@ permalink: /meetup-03-09-2026/
       <article class="talk-card">
         <p class="talk-time">21:35</p>
         <h3>Encerramento &amp; sorteios</h3>
-        <p>Agradecimentos finais, sorteios e fechamento das atividades.</p>
+        <p>Agradecimentos finais, sorteios e fechamento das atividades às 21h50.</p>
       </article>
     </div>
   </section>
@@ -179,6 +181,21 @@ permalink: /meetup-03-09-2026/
       </iframe>
     </div>
   </section>
+
+  {% assign edition_speakers = site.speakers | where_exp: "s", "s.meetups contains 'meetup-03-09-2026'" | sort: "name" %}
+  {% if edition_speakers != empty %}
+  <section class="meetup-card">
+    <h2>Palestrantes desta edição</h2>
+    <div class="edition-speakers">
+      {% for speaker in edition_speakers %}
+        <a class="past-speaker-card" href="{{ speaker.url | relative_url }}">
+          {% if speaker.photo %}<img src="{{ speaker.photo | replace: ' ', '%20' | relative_url }}" alt="Foto de {{ speaker.name }}">{% endif %}
+          <h3>{{ speaker.name }}</h3>
+        </a>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
 </main>
 
 <div class="modal" id="registrationFeedbackModal" aria-hidden="true">

@@ -914,6 +914,29 @@ footer a {
   font-size: 0.88rem;
 }
 
+.talk-speaker-link {
+  color: inherit;
+  text-decoration: none;
+  border-radius: 10px;
+}
+
+.talk-speaker > .talk-speaker-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.talk-speaker-link:hover h4 {
+  color: var(--accent);
+}
+
+.talk-speaker-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
 .talk-speaker-list {
   display: grid;
   gap: 0.7rem;

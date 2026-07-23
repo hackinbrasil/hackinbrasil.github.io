@@ -15,6 +15,8 @@ layout: default
 </header>
 
 <main class="meetup-page">
+  {% assign edition_speakers = site.speakers | where_exp: "s", "s.meetups contains page.meetup_slug" | sort: "name" %}
+
   <section class="meetup-card">
     <p class="hero-kicker">Edição anterior</p>
     <h1 class="meetup-title">Meetup de Cibersegurança - {{ page.date_display }}</h1>
@@ -33,6 +35,31 @@ layout: default
     <h2>Agenda e Palestrantes</h2>
     <p class="meetup-subtitle">Palestras desta edição — detalhes a confirmar.</p>
     <div class="talks-grid">
+      {% if edition_speakers != empty %}
+      {% for speaker in edition_speakers %}
+      {% assign talk = speaker.talks | where: "meetup", page.meetup_slug | first %}
+      <article class="talk-card">
+        <p class="talk-time">--:--</p>
+        <div class="talk-layout">
+          <div class="talk-content">
+            <h3>{% if talk and talk.title %}{{ talk.title }}{% else %}Palestra a confirmar{% endif %}</h3>
+            {% if talk and talk.description %}
+            <p>{{ talk.description }}</p>
+            {% else %}
+            <p>Título e descrição da palestra a confirmar.</p>
+            {% endif %}
+          </div>
+          <aside class="talk-speaker">
+            <a class="talk-speaker-link" href="{{ speaker.url | relative_url }}" aria-label="Ver perfil de {{ speaker.name }}">
+              {% if speaker.photo %}<img src="{{ speaker.photo | replace: ' ', '%20' | relative_url }}" alt="Foto de {{ speaker.name }}">{% endif %}
+              <h4>{{ speaker.name }}</h4>
+              {% if speaker.role %}<p class="speaker-role">{{ speaker.role }}</p>{% endif %}
+            </a>
+          </aside>
+        </div>
+      </article>
+      {% endfor %}
+      {% else %}
       {% for i in (1..page.speakers_count) %}
       <article class="talk-card">
         <p class="talk-time">--:--</p>
@@ -48,6 +75,7 @@ layout: default
         </div>
       </article>
       {% endfor %}
+      {% endif %}
     </div>
   </section>
   {% endif %}
@@ -67,7 +95,6 @@ layout: default
     <p>Endereço completo a confirmar.</p>
   </section>
 
-  {% assign edition_speakers = site.speakers | where_exp: "s", "s.meetups contains page.meetup_slug" | sort: "name" %}
   {% if edition_speakers != empty %}
   <section class="meetup-card">
     <h2>Palestrantes desta edição</h2>
