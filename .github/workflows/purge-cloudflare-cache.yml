@@ -1,0 +1,57 @@
+name: Purge Cloudflare cache
+
+on:
+  workflow_run:
+    workflows:
+      - pages build and deployment
+    types:
+      - completed
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: purge-cloudflare-cache
+  cancel-in-progress: true
+
+jobs:
+  purge:
+    name: Purga total do cache
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+
+    steps:
+      - name: Purgar todo o cache da zona
+        env:
+          CLOUDFLARE_PURGE_TOKEN: ${{ secrets.CLOUDFLARE_PURGE_TOKEN }}
+          CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${CLOUDFLARE_PURGE_TOKEN}" ] || [ -z "${CLOUDFLARE_ZONE_ID}" ]; then
+            echo "::error::CLOUDFLARE_PURGE_TOKEN e CLOUDFLARE_ZONE_ID precisam estar configurados nos secrets."
+            exit 1
+          fi
+
+          response="$(curl --silent --show-error --fail-with-body \
+            --request POST \
+            "https://api.cloudflare.com/client/v4/zones/${CLOUDFLARE_ZONE_ID}/purge_cache" \
+            --header "Authorization: Bearer ${CLOUDFLARE_PURGE_TOKEN}" \
+            --header "Content-Type: application/json" \
+            --data '{"purge_everything":true}')"
+
+          echo "${response}"
+
+          if [ "$(echo "${response}" | jq -r '.success')" != "true" ]; then
+            echo "::error::Falha ao purgar o cache do Cloudflare."
+            exit 1
+          fi
+
+          echo "Cache do Cloudflare purgado com sucesso."
