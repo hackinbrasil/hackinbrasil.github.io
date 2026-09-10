@@ -260,7 +260,7 @@ describe("session exchange", () => {
     mail.restore();
   });
 
-  it("burns the magic link after a single use", async () => {
+  it("allows the magic link to be reused within its validity window", async () => {
     await requestMagicLink(env, ctx, PARTICIPANT);
     const content = `${mail.sent[0].body.html || ""}${mail.sent[0].body.text || ""}`;
     const token = decodeURIComponent(content.match(/token=([A-Za-z0-9_-]+)/)[1]);
@@ -277,7 +277,7 @@ describe("session exchange", () => {
     );
 
     expect(first.status).toBe(200);
-    expect(second.status).toBe(401);
+    expect(second.status).toBe(200);
   });
 
   it("rejects an invented token", async () => {

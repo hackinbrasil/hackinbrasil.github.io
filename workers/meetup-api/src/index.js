@@ -856,7 +856,7 @@ const RESERVED_NICKNAMES = [
 ];
 
 const GENERIC_MAGIC_LINK_MESSAGE =
-  "Se houver inscrições vinculadas a este e-mail, enviamos um link de acesso. O link vale por 15 minutos e só pode ser usado uma vez.";
+  "Se houver inscrições vinculadas a este e-mail, enviamos um link de acesso. O link vale por 15 minutos e pode ser usado várias vezes nesse período.";
 
 function normalizeConfirmation(value) {
   return String(value || "")
@@ -930,7 +930,7 @@ function buildMagicLinkEmail(link) {
     "",
     link,
     "",
-    `O link expira em ${MAGIC_LINK_TTL_MINUTES} minutos e só pode ser usado uma vez.`,
+    `O link expira em ${MAGIC_LINK_TTL_MINUTES} minutos e pode ser usado várias vezes nesse período.`,
     "Se não foi você quem pediu, ignore este e-mail: nenhuma ação será tomada.",
     "",
     "Abraços,",
@@ -942,7 +942,7 @@ function buildMagicLinkEmail(link) {
     "<p>Recebemos um pedido de acesso à área de inscrições do Hack in Brasil.</p>" +
     `<p><a href="${safeLink}">Ver e gerenciar minhas inscrições</a></p>` +
     `<p style="color:#666;font-size:13px;word-break:break-all;">Se o botão não funcionar, copie este endereço no navegador:<br>${safeLink}</p>` +
-    `<p>O link expira em ${MAGIC_LINK_TTL_MINUTES} minutos e só pode ser usado uma vez.</p>` +
+    `<p>O link expira em ${MAGIC_LINK_TTL_MINUTES} minutos e pode ser usado várias vezes nesse período.</p>` +
     "<p>Se não foi você quem pediu, ignore este e-mail: nenhuma ação será tomada.</p>" +
     "<p>Abraços,<br>Equipe Hack in Brasil</p>";
 
@@ -1082,17 +1082,10 @@ async function handleSessionCreate(request, env, corsOrigin) {
   try {
     const tokenHash = await hashToken(token);
 
-    const consumed = await env.DB
-      .prepare(
-        "UPDATE auth_login_requests SET consumed = 1 WHERE token_hash = ? AND consumed = 0 AND expires_at > CURRENT_TIMESTAMP"
-      )
-      .bind(tokenHash)
-      .run();
-
-    if (!consumed.meta || consumed.meta.changes !== 1) return invalidTokenResponse;
-
     const loginRequest = await env.DB
-      .prepare("SELECT email FROM auth_login_requests WHERE token_hash = ?")
+      .prepare(
+        "SELECT email FROM auth_login_requests WHERE token_hash = ? AND expires_at > CURRENT_TIMESTAMP"
+      )
       .bind(tokenHash)
       .first();
 
