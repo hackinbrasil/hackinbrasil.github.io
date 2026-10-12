@@ -4,7 +4,7 @@ ruby "~> 3.2.0"
 
 # Not using the `github-pages` gem: it pins jekyll-remote-theme -> rubyzip < 3.0
 # (vulnerable). We don't use remote themes; these match what Pages 232 ships.
-gem "jekyll", "3.10.0"
+gem "jekyll", "4.4.1"
 gem "kramdown-parser-gfm", "1.1.0"
 
 group :jekyll_plugins do
