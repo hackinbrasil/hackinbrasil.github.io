@@ -12,7 +12,7 @@ group :jekyll_plugins do
   gem "jekyll-sitemap", "1.4.0"
 end
 
-gem "faraday", "2.15.0"
+gem "faraday", "2.15.1"
 
 # Needed for local `bundle exec jekyll serve`
 gem "webrick", "~> 1.8"
