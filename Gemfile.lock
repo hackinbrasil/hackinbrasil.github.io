@@ -102,7 +102,7 @@ DEPENDENCIES
   webrick (~> 1.8)
 
 RUBY VERSION
-  ruby 3.4.12
+  ruby 3.4.11
 
 BUNDLED WITH
   4.0.20
