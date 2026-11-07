@@ -151,14 +151,18 @@ window.HIBForms = (function () {
     return typeof value === "string" && /^[A-Za-z0-9_-]{32,128}$/.test(value);
   }
 
-  // Escapes one CSV cell. Besides CSV quoting, neutralizes spreadsheet formula
-  // injection (CWE-1236): cells starting (after optional whitespace/control
-  // chars) with = + - @ get a leading apostrophe so Excel/Sheets show literal text.
+  // Escapes one CSV cell, defending against spreadsheet formula injection
+  // (CWE-1236):
+  //  - values starting (after optional whitespace/control chars) with = + - @
+  //    get a leading apostrophe so Excel/Sheets show literal text;
+  //  - every field is always quoted, so a value can never be split into extra
+  //    cells by the importer's delimiter (comma, semicolon as in pt-BR Excel,
+  //    tab...), which would otherwise expose an embedded "=..." as its own cell.
   function csvField(value) {
     let s = String(value == null ? "" : value);
     // eslint-disable-next-line no-control-regex
     if (/^[\s\u0000-\u001f]*[=+\-@]|^[\t\r]/.test(s)) s = `'${s}`;
-    return /[",\n\r]/.test(s) || s.startsWith("'") ? `"${s.replace(/"/g, '""')}"` : s;
+    return `"${s.replace(/"/g, '""')}"`;
   }
 
   return {

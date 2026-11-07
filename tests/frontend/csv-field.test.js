@@ -8,9 +8,9 @@ const src = fs.readFileSync(path.join(ROOT, "assets", "js", "form-utils.js"), "u
 const { csvField } = new Function("window", `${src}; return window.HIBForms;`)({});
 
 describe("csvField", () => {
-  it("leaves plain values alone", () => {
-    expect(csvField("Maria Silva")).toBe("Maria Silva");
-    expect(csvField(null)).toBe("");
+  it("always quotes plain values", () => {
+    expect(csvField("Maria Silva")).toBe('"Maria Silva"');
+    expect(csvField(null)).toBe('""');
   });
 
   it("quotes CSV-structural characters", () => {
@@ -26,6 +26,17 @@ describe("csvField", () => {
   );
 
   it("does not alter formula characters in the middle", () => {
-    expect(csvField("a=b")).toBe("a=b");
+    expect(csvField("a=b")).toBe('"a=b"');
   });
+
+  // Alternate-delimiter bypass: an unquoted "Alice;=1+1;X" is split by a
+  // semicolon-delimited import (pt-BR Excel) and exposes "=1+1" as a cell.
+  it.each(["Alice;=1+1;X", "Ana\t=1+1", "Ana|=1+1", "a,=1+1"])(
+    "keeps delimiter-containing value %j inside one quoted cell",
+    (value) => {
+      const out = csvField(value);
+      expect(out.startsWith('"') && out.endsWith('"')).toBe(true);
+      expect(out.slice(1, -1)).toBe(value);
+    }
+  );
 });
