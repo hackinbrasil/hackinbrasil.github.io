@@ -1,6 +1,6 @@
 source "https://rubygems.org"
 
-ruby "~> 3.2.0"
+ruby "~> 3.4.0"
 
 # Not using the `github-pages` gem: it pins jekyll-remote-theme -> rubyzip < 3.0
 # (vulnerable). We don't use remote themes; these match what Pages 232 ships.
