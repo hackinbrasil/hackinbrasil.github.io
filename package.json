@@ -23,5 +23,8 @@
     "stylelint": "^17.16.0",
     "stylelint-config-recommended": "^18.0.0",
     "vitest": "^5.0.5"
+  },
+  "overrides": {
+    "minimatch": "^11.0.1"
   }
 }
