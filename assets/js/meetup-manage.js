@@ -411,10 +411,7 @@
     manageStatus.classList.add("is-success");
   }
 
-  function csvField(value) {
-    const s = String(value == null ? "" : value);
-    return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-  }
+  const csvField = window.HIBForms.csvField;
 
   function downloadCsv(filename, csv) {
     const blob = new Blob(["﻿" + csv], {type: "text/csv;charset=utf-8;"});

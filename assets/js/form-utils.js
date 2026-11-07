@@ -151,7 +151,18 @@ window.HIBForms = (function () {
     return typeof value === "string" && /^[A-Za-z0-9_-]{32,128}$/.test(value);
   }
 
+  // Escapes one CSV cell. Besides CSV quoting, neutralizes spreadsheet formula
+  // injection (CWE-1236): cells starting (after optional whitespace/control
+  // chars) with = + - @ get a leading apostrophe so Excel/Sheets show literal text.
+  function csvField(value) {
+    let s = String(value == null ? "" : value);
+    // eslint-disable-next-line no-control-regex
+    if (/^[\s\u0000-\u001f]*[=+\-@]|^[\t\r]/.test(s)) s = `'${s}`;
+    return /[",\n\r]/.test(s) || s.startsWith("'") ? `"${s.replace(/"/g, '""')}"` : s;
+  }
+
   return {
+    csvField,
     onlyDigits,
     normalizePhone,
     formatPhone,
